@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.1">
+	<persistence-unit name="DBCoreJpa">
+		<properties>
+			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
+			<property name="javax.persistence.jdbc.user" value="rptapp" />
+			<property name="javax.persistence.jdbc.password" value="rptapp1888"/>
+			<property name="javax.persistence.jdbc.url" 
+				value="jdbc:postgresql://uddaeil123.iptime.org:9474/udmtmesdb" />
+			<property name="hibernate.dialect" 
+				value="org.hibernate.dialect.PostgreSQLDialect" />
+			
+		</properties>
+	</persistence-unit>
+</persistence>
