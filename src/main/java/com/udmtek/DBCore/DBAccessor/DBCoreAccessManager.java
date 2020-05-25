@@ -1,45 +1,43 @@
 package com.udmtek.DBCore.DBAccessor;
 
-/**
- * This is the interface module for the user of DBCore package.
- * @author mhjin < julu1 @ naver.com>
- * @version 0.0.1
+import java.util.Map;
+
+import javax.persistence.Persistence;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionFactoryDelegatingImpl;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+import com.udmtek.DBCore.ComUtil.DBCoreLogger;
+
+import lombok.Getter;
+
+/** This is implement class DBCoreAccessManager.
+ * @author julu1 <julu1 @ naver.com >
+ * @version 
  */
-public interface DBCoreAccessManager {
+@Component
+public class DBCoreAccessManager  {
+	@Autowired
+	ApplicationContext context;
+	@Autowired
+	Map<String,DBCoreSessionManager> PersistenceMap;
 	
-	public DBCoreSessionManager makeSessionManager();
-	/** 
-	 * get a UnusedSession
-	 * @return DBCoreSession
-	 */
-	public DBCoreSession getSession();
-	
-	/**
-	 * end the transaction and set unused the currentSession
-	 * @param DBCoreSession getting from getSesssion() or getSession(DBCoreSessionManager)
-	 */
-	public void releaseSession(DBCoreSession currentSession);
-	
-	/** 
-	 * This is for another DataBase connection.
-	 * To make Database Connection, have to specify in persistence.xml
-	 * @param persistence-unit name in persistence.xml
-	 * @return DBCoreSessionManager
-	 */
-	public DBCoreSessionManager createDBCoreSessionManager( String PersistenceUnitName);
-	
-	/** 
-	 * This is for another DataBase connection.
-	 * get the DBCoreSssion.
-	 * @param DBCoreSessionManager making from createDBCoreSessionManager( String )
-	 * @return DBCoreSession
-	 */
-	public DBCoreSession getSession (DBCoreSessionManager DBCoreSessionMgr);
-	
-	/**
-	 * This is for another DataBase connection.
-	 * Destroy DBCoreSessionManager. It does not use anymore.
-	 * @param DBCoreSessionManager making from createDBCoreSessionManager( String )
-	 */
-	public void deleteDBCoreSessionManager(DBCoreSessionManager DBCoreSesionMgr);
+	public  DBCoreSessionManager makeSessionManager(String PersistenceUnit) {
+		//if the SessionManager exist in the map, return existing SessionManager
+		DBCoreSessionManager returnManager=PersistenceMap.get(PersistenceUnit);
+		if (returnManager != null)
+		{
+			return returnManager;
+		}
+		
+		returnManager=(DBCoreSessionManager) new DBCoreSessionManagerImpl(PersistenceUnit);
+		PersistenceMap.put(PersistenceUnit, returnManager);
+		return returnManager;
+	}
 }

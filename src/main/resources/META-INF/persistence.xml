@@ -2,14 +2,18 @@
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.1">
 	<persistence-unit name="DBCoreJpa">
 		<properties>
-			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
-			<property name="javax.persistence.jdbc.user" value="rptapp" />
-			<property name="javax.persistence.jdbc.password" value="rptapp1888"/>
-			<property name="javax.persistence.jdbc.url" 
-				value="jdbc:postgresql://uddaeil123.iptime.org:9474/udmtmesdb" />
+			<property name="hibernate.connection.driver_class" value="org.postgresql.Driver" />
+			<property name="hibernate.connection.url" 
+				value="jdbc:postgresql://127.0.0.1:5432/udmtmesdb" />
+   			<property name="hibernate.connection.username" value="postgres" />
+			<property name="hibernate.connection.password" value="jmh0905pg!@"/>
 			<property name="hibernate.dialect" 
-				value="org.hibernate.dialect.PostgreSQLDialect" />
-			
+						value="org.hibernate.dialect.PostgreSQLDialect" />	
+			<property name="hibernate.show-sql" value="true" />
+			<property name="hibernate.hikari.minimumIdle" value="2"/>
+			<property name="hibernate.hikari.maximumPoolSize" value="5"/>
+			<property name="hibernate.connection.provider_class" 
+						value="com.zaxxer.hikari.hibernate.HikariConnectionProvider" />
 		</properties>
 	</persistence-unit>
 </persistence>

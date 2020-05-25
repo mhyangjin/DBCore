@@ -1,27 +1,24 @@
 package com.udmtek.DBCore.DBAccessor;
 
-import org.hibernate.SessionFactory;
+import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionImplementor;
 
 /**
  * interface DBCoreSession
  * @author julu1 <julu1 @ naver.com >
  * @version 0.0.1
  */
-public interface DBCoreSession extends SessionFactory {
-	
-
-	/**
-	 * get generated TransactionID (UUID of Session + sequence number of Transaction )
-	 * @return transaction id
-	 */
-	public int getTranseactionID();
+public interface DBCoreSession{
 	
 	/**
 	 * start the transaction 
 	 * @param SessionType ("READ_ONLY" or "READ_WRITE" )
 	 * @return return true if success otherwise false.
 	 */
-	public boolean beginTransaction(String SessionType);
+	
+	public boolean connectSession();
+	
+	public boolean beginTransaction(boolean ReadOnly);
 	
 	/**
 	 * end the transaction
@@ -30,9 +27,7 @@ public interface DBCoreSession extends SessionFactory {
 	 */
 	public boolean endTransaction(boolean CommitOK);
 	
-	/**
-	 * return DBCoressionManager
-	 * @return DBCoressionManager 
-	 */
-	public DBCoreSessionManager getDBCoreSessionManager(); 
+	public String getTransactionID();
+	
+	public DBCoreSessionManager getDBCoreSessionManager();
 }

@@ -48,6 +48,6 @@ public class JpaMain {
 			currSession.close();
 		}
 		
-		ssfImpl.close();
+		//ssfImpl.close();
 	}
 }

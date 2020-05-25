@@ -3,15 +3,15 @@ package com.udmtek.DBCore.DBAccessor;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import com.udmtek.DBCore.ComUtil.AOPLogger;
+import javax.persistence.Persistence;
+import org.hibernate.SessionFactory;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,153 +19,122 @@ import lombok.Setter;
  * @author julu1 <julu1 @ naver.com >
  * @version 
  */
-@Component
-public class DBCoreSessionManagerImpl implements DBCoreSessionManager {
-	//get the initSessionCount and MAXSessionCount in the application.properties file
-	@Value("${initSessionCount}")
-	private String SessionCountStr;
-	@Value("${MAXSessionCount}")
-	private String MAXSessionCountStr;
-	
+public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	@Getter
 	@Setter
-	private int SessionCount;
-	
-
+	private String PersistenceUnit;
 	@Getter
-	@Setter
-	private int MAXSessionCount;
+	private SessionFactory ssfImpl=null;
+	@Getter
+	private int MaxSessionPoolSize;
+	private Set<DBCoreSession> unusingSessions=null;
+	private Set<DBCoreSession> usingSessions=null;
 	
-	HashSet<DBCoreSession> UsingSessions=null;
-	HashSet<DBCoreSession> UnusigSessions=null;
+	public DBCoreSessionManagerImpl(String argPersistUnit) {
+		PersistenceUnit=argPersistUnit;
+		ssfImpl=(SessionFactory) Persistence.createEntityManagerFactory(PersistenceUnit);
+		Map<String,Object> properties = ssfImpl.getProperties();
+		MaxSessionPoolSize= Integer.parseInt(properties.get("hibernate.hikari.maximumPoolSize").toString());
 		
-	public DBCoreSessionManagerImpl() {
-		// TODO Auto-generated constructor stub
-		SessionCount=Integer.parseInt(SessionCountStr);
-		MAXSessionCount=Integer.parseInt(MAXSessionCountStr);
+		if (unusingSessions == null)
+		{
+			unusingSessions=Collections.synchronizedSet(new HashSet<DBCoreSession>());
+			usingSessions=Collections.synchronizedSet(new HashSet<DBCoreSession>());
+		}
+		createEmptySessions();
 	}
 	
+	@Override
 	public void printValues() {
-		String msg=this.getClass().getName() + ":initSessionCount=" + SessionCountStr
-				  + ":MAXSessionCount=" + MAXSessionCountStr;
+		String msg=this.getClass().getName() + "PersistenceUnitName=" + PersistenceUnit 
+											 + " MaxPoolSize=" + MaxSessionPoolSize;
 		DBCoreLogger.printInfo(msg);
 	}
 	
 	@Override
-	public void startManager() {
-		// TODO Auto-generated method stub
-		if(!checkSessionCount()) {
-			//Exception throw!!!
-		}
-		
-		try
-		{
-			//using Collections.synchronizedSet() is for safety in multi-thread env.
-			UsingSessions=(HashSet<DBCoreSession>) Collections.synchronizedSet(new HashSet< DBCoreSession >());
-			UnusigSessions=(HashSet<DBCoreSession>) Collections.synchronizedSet(new HashSet< DBCoreSession >());
-		} catch (Exception e) {
-			if (UsingSessions != null) {
-				String msg=this.getClass().getName() + ":Exception thows when create HashSet<UsingSessions>";
-				DBCoreLogger.printInfo(msg);
-				UsingSessions.clear();
-				UsingSessions=null;
-			}
-			else {
-				String msg=this.getClass().getName() + ":Exception thows when create HashSet<UnusingSessions>";
-				DBCoreLogger.printInfo(msg);				
-			}
-			throw e;
-		}
-		
-		createSessions(SessionCount);
-	}
-
-	
-	@Override
-	public DBCoreSession getUnusingSession() {
+	public DBCoreSession getSession() {
 		// TODO Auto-generated method stub
 		
 		DBCoreSession currSession=null;
-		//if All session is used, create Session
-		if (UnusigSessions.isEmpty()) {
-			currSession=this.createSession();
+		currSession=findUnusingSession();
+		
+		String msg="UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
+		DBCoreLogger.printInfo(msg);
+		return currSession;
+	}
+	
+	@Override
+	public DBCoreSession getSession(int retryNo, int waitTime) {
+		// TODO Auto-generated method stub
+		DBCoreSession currSession=null;
+		if ( retryNo <=0 ) {
+			DBCoreLogger.printError("retryNo has to larger than 0");
+			return null;
 		}
-		else {
-			currSession=this.removeUnusingSesion(null);
+		
+		if ( waitTime < 0 ) {
+			DBCoreLogger.printError("waitTime has to larger than 0");
+			return null;
 		}
+		
+		for ( int i=0; i < retryNo; i++ )
+		{
+			currSession=findUnusingSession();
+			if (currSession ==null) {
+				try {
+					String msg="All Session is used.. Sleep and retry ..." + i;
+					DBCoreLogger.printInfo(msg);
+					Thread.sleep(waitTime);
+				}
+				catch (Exception e) {
+					//do nothing
+				}
+			}
+			else
+				break;
+		}
+		
+		String msg="UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
+		DBCoreLogger.printInfo(msg);
+	
 		return currSession;
 	}
 
-	@Override
-	public void endUsingSession(DBCoreSession currentSession) {
-		// TODO Auto-generated method stub
-		this.insertUnusingSession(currentSession);
-	
-	}
-	
-	private boolean checkSessionCount()
-	{
-		boolean returnValue=true;
-		if ( SessionCount < 0 ) {
-			String msg="Initial Session Count has larger than 0, but value is " + SessionCount;
-			DBCoreLogger.printError(msg);
-			return false;
-		}
+	private DBCoreSession findUnusingSession() {
 		
-		if ( MAXSessionCount < 0) {
-			String msg="Initial Session Count has larger than 0, but value is " + MAXSessionCount;
-			DBCoreLogger.printError(msg);
-			return false;			
-		}
-		
-		if ( SessionCount > MAXSessionCount ) {
-			String msg="SessionCount{" + SessionCount +"} has not larger than MAXSessionCount{"+ MAXSessionCount +"} ";
-			DBCoreLogger.printError(msg);
-			return false;			
-		}
-		
-		return returnValue;
-	}
-	
-	private DBCoreSession createSession() {
-		return null;
-	}
-	
-	private void createSessions(int createSessionCount) {
-		for (int i=0; i< createSessionCount; i++) {
-					
-		}
-		return;
-	}
-	
-	
-	private DBCoreSession insertUnusingSession(DBCoreSession insertSession) {
-		DBCoreSession returnSession=null;
-		
-		//move insertSession from UsionSessions to UnusingSessions
-		if (insertSession != null) {
-			returnSession= insertSession;
-			//Always do UnusionSessions first. 
-			this.UnusigSessions.add(insertSession);
-			this.UsingSessions.remove(insertSession);
-		
-		}
-		return returnSession;
-	}
-	
-	private DBCoreSession removeUnusingSesion(DBCoreSession removeSession) {
-		DBCoreSession returnSession=null;
-		
-		//if removeSesion is null, get any session.
-		if ( removeSession == null ) {
-			Iterator<DBCoreSession> it=UnusigSessions.iterator();
-			returnSession=(DBCoreSession) it.next();
-		}
-		//move returnSession from UnusingSessions to UsionSessions
-		//Always do UnusionSessions first. 
-		this.UnusigSessions.remove(returnSession);
-		this.UsingSessions.add(returnSession);
-		return returnSession;
-	}
+		DBCoreSession currSession=null;
 
+		synchronized( this ) {
+			if( unusingSessions.size() == 0 )
+			{
+				DBCoreLogger.printInfo("All Session is used!!");
+				//have to add throwing the exception later
+				return currSession;
+			}
+		
+		//use synchronized for stability in simultaneous access
+			Iterator<DBCoreSession> it=unusingSessions.iterator();
+			currSession=it.next();
+			unusingSessions.remove(currSession);
+		}
+		
+		usingSessions.add(currSession);
+		currSession.connectSession();			
+		return currSession;
+	}
+	
+	public void returnSession(DBCoreSession currSession) {
+		unusingSessions.add(currSession);
+		usingSessions.remove(currSession);
+		String msg="UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
+		DBCoreLogger.printInfo(msg);
+	}
+	
+	private void createEmptySessions() {
+		for ( int i=0; i < MaxSessionPoolSize; i++)
+		{
+			DBCoreSession newSession=(DBCoreSession) new DBCoreSessionImpl(this,i+1);
+			unusingSessions.add(newSession);
+		}
+	}
 }
