@@ -36,8 +36,15 @@ public class DBCoreAccessManager  {
 			return returnManager;
 		}
 		
-		returnManager=(DBCoreSessionManager) new DBCoreSessionManagerImpl(PersistenceUnit);
+		returnManager= context.getBean(DBCoreSessionManager.class);
+		returnManager.startSessionManager(PersistenceUnit);
 		PersistenceMap.put(PersistenceUnit, returnManager);
 		return returnManager;
+	}
+	
+	public void closeSessionManager(String PersistenceUnit) {
+		DBCoreSessionManager returnManager=PersistenceMap.get(PersistenceUnit);
+		returnManager.coloseAllSessions();
+		PersistenceMap.remove(PersistenceUnit);
 	}
 }
