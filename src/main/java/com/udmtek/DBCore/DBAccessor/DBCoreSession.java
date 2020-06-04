@@ -2,6 +2,7 @@ package com.udmtek.DBCore.DBAccessor;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
@@ -38,7 +39,7 @@ public interface DBCoreSession{
 	 * @return return true if success otherwise false.
 	 */
 	public boolean beginTransaction(boolean ReadOnly);
-	
+	public Session getThisSession();
 	/**
 	 * end the transaction
 	 * @param CommitOK (true:commit,false:rollback)

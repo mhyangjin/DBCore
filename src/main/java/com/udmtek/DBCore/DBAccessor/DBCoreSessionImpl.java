@@ -60,6 +60,9 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		return true;
 	}
 	
+	public Session getThisSession() {
+		return thisSession;
+	}
 	
 	@Override
 	public String getTransactionID() {
@@ -70,7 +73,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	public boolean beginTransaction(boolean ReadOnly) {
 		this.ReadOnly = ReadOnly;
 		currTransaction=thisSession.getTransaction();
-		if (TransactionSeq > 2147483647 ) {
+		if (TransactionSeq >= 2147483647 ) {
 			TransactionSeq=1;
 		}
 		TransactionSeq++;

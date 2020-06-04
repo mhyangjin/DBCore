@@ -146,7 +146,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		for ( int i=0; i < MaxSessionPoolSize; i++)
 		{
 			DBCoreSession newSession=context.getBean(DBCoreSession.class);
-			String SessionName=PersistenceUnit + i;
+			String SessionName=PersistenceUnit +"Session"+ i;
 			newSession.readyConnect(ssfImpl, SessionName);
 			unusingSessions.add(newSession);
 		}

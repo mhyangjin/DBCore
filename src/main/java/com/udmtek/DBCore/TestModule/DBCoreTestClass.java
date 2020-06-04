@@ -80,8 +80,7 @@ public class DBCoreTestClass {
 		boolean BeginOK=false;
 		
 		try  {
-			currSession.beginTransaction(true);
-			BeginOK=true;
+			BeginOK=currSession.beginTransaction(true);
 			//--- << 조회 부분 시작 >> ---
 			FactoryDAOImpl factoryImpl=currSession.getDAOImpl(FactoryDAOImpl.class);
 			Factories = factoryImpl.getAll();
@@ -96,21 +95,12 @@ public class DBCoreTestClass {
 		}
 		finally {
 			myManager.closeSession(currSession);
-		}
-		return Factories;
-	}
-	
-	//FactoryDAO의 primary key를 이용한 1건 조회 기능
-	public Factory readFactoryWithKey (String argmemberCorpId,String argfactoryId) {
-	
-		DBCoreSession currSession=myManager.openSession(3,1000);
-		if (currSession == null )
+		}ession == null )
 			return null;
 		Factory findFactory=null;
 		boolean BeginOK=false;
 		try {
-			currSession.beginTransaction(true);
-			BeginOK=true;
+			BeginOK=currSession.beginTransaction(true);
 			DBCoreLogger.printInfo("memberCorpID:" + argmemberCorpId + " factoryId:" + argfactoryId);
 			//--- << 조회 부분 시작 >> ---
 			FactoryDAOImpl factoryImpl=(FactoryDAOImpl)currSession.getDAOImpl("Factory"); //Table Name으로 생성
@@ -139,8 +129,7 @@ public class DBCoreTestClass {
 			return null;
 		boolean BeginOK=false;
 		try {
-			currSession.beginTransaction(false);
-			BeginOK=true;
+			BeginOK=currSession.beginTransaction(false);
 	
 			//--- << update 부분 시작 >> ---
 			FactoryDAOImpl factoryImpl=currSession.getDAOImpl(FactoryDAOImpl.class); //DAOImpl class로 생성(Table Name 도 가능)
@@ -174,8 +163,7 @@ public class DBCoreTestClass {
 		boolean BeginOK=false;
 		try {
 				
-			currSession.beginTransaction(false);
-			BeginOK=true;
+			BeginOK=currSession.beginTransaction(false);
 			//--- << delete 부분 시작 >> ---
 			FactoryDAOImpl factoryImpl=(FactoryDAOImpl)currSession.getDAOImpl("Factory"); //Table Name으로 생성
 			FactoryId factoryKey=new FactoryId(argmemberCorpId,argfactoryId );			//key entity 생성
@@ -199,6 +187,8 @@ public class DBCoreTestClass {
 	//FactoryDAO의 insert 기능 (1건)
 	public String insertFactory (Factory myfactory) {
 		DBCoreSession currSession=null;
+		String result="insert OK";
+		
 		currSession = myManager.openSession(3,1000);
 		if (currSession == null )
 			return null;
@@ -206,28 +196,22 @@ public class DBCoreTestClass {
 		boolean BeginOK=false;
 		try {
 				
-			currSession.beginTransaction(false);
-			BeginOK=true;
-
+			BeginOK=currSession.beginTransaction(false);
 			//--- << insert 부분 시작 >> ---
 			FactoryDAOImpl factoryImpl=currSession.getDAOImpl(FactoryDAOImpl.class); //DAOImpl class로 생성(Table Name 도 가능)
-			FactoryIdDAOImpl factoryIdImpl = (FactoryIdDAOImpl)factoryImpl.getKeyDAOImpl("Factory"); //Key검증을 위해 IdDAO를 생성
-			if ( factoryIdImpl.isValid(myfactory.getKey()) )	//Key 값이 유효한지 확인한다.
-			{
-				factoryImpl.insert( myfactory);
-			}
+			factoryImpl.insert( myfactory);
 			// -- <<  insert 부분 끝  >> ---
-			
 			currSession.endTransaction(true);
 		}
 		catch ( Exception e) {
 			if ( BeginOK )
-				currSession.endTransaction(false); //Rollback			
+				currSession.endTransaction(false); //Rollback	
+			result="insert fail";
 		}
 		finally {
 			myManager.closeSession(currSession);
 		}
-		String result="Update OK";
+		
 		return result;
 	
 	}
@@ -241,9 +225,7 @@ public class DBCoreTestClass {
 		List<Factory> Factories=null;
 		boolean BeginOK=false;
 		try {
-			currSession.beginTransaction(true);
-			BeginOK=true;
-			
+			BeginOK=currSession.beginTransaction(true);
 			if (QueryType.equals("SQL")) { 
 				//SQL이면 native Query로 수행
 				//--- << 조회 부분 시작 >> ---

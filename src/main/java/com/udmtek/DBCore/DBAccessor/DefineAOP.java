@@ -40,8 +40,7 @@ public class DefineAOP {
 		 Object result=null;
 		 boolean BeginOK=false;
 		 try {
-			 currSession.beginTransaction(false);
-			 BeginOK=true;
+			 BeginOK=currSession.beginTransaction(false);
 			 //호출한 class에 member 변수에 DBCoreSession이 선언되어 있으면  setting하여 준다.
 			 //DBCoreSession 상단에 @Setter annotation이 붙거나 "set"+"변수이름(첫글자 대문자)"로 선언된 함수가 있어야 한다.
 			 Object targetObject=joinpoint.getTarget();
@@ -84,7 +83,7 @@ public class DefineAOP {
 		}
 		 boolean BeginOK=false;
 		try {
-			 currSession.beginTransaction(true);
+			BeginOK=currSession.beginTransaction(true);
 			 //호출한 class에 member 변수에 DBCoreSession이 선언되어 있으면  setting하여 준다.
 			 //DBCoreSession 상단에 @Setter annotation이 붙거나 "set"+"변수이름(첫글자 대문자)"로 선언된 함수가 있어야 한다.
 			 Object targetObject=joinpoint.getTarget();
