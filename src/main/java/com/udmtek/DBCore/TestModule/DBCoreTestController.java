@@ -8,81 +8,151 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
+import com.udmtek.model.Factory;
 
+/**
+ * @author julu1 <julu1 @ naver.com >
+ * @version 0.1.0
+ */
 @Controller
 public class DBCoreTestController {
 	@Autowired
 	ApplicationContext context;
+	@Autowired
+	DBCoreAccessManager DBAccessor;
 
 	@RequestMapping(value="/")
 	public String testGuid() {
 		return "main";
 	}
-		
 	
-	@GetMapping(value="/sessionTest")
-	@ResponseBody
-	public String sessionTest() {
-			
-		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-		
-		DBCoreLogger.printInfo("[Step 1] make DBCoreSessionManger, DBCoreSessions..");
-		Mystart.ready();
-		
-		DBCoreLogger.printInfo("[Step 2] get and release DBCoreSession in multi-thread..");
-		
-		Mystart.testDBCoreSesion();
-			
-				
-		  Mystart.testDBCoreSesion(); //Mystart.testDBCoreSesion();
-		  Mystart.testDBCoreSesion(); //Mystart.testDBCoreSesion();
-		  Mystart.testDBCoreSesion(); //Mystart.testDBCoreSesion();
-		  return "Test done";
+	@RequestMapping(value="SessionPoolTestForm")
+	public String SessionPoolTestForm() {
+		return "SessionPoolTestForm";
 	}
-	
-	@GetMapping(value="/reaAlldData")
-	public ModelAndView reaAlldData() {
+
+	@GetMapping(value="reaAlldData")
+	public ModelAndView reaAlldData(@RequestParam("sourceType") String sourceType ) {
 			
-		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-		Mystart.ready();
-		ModelAndView mv=new ModelAndView("Factory");
-		mv.addObject("List", Mystart.readFactory());
+		ModelAndView mv=new ModelAndView("FactoryList");
+		mv.addObject("sourceType",sourceType);
+		if ( sourceType.equals("DAOImpl")) {
+			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+			mv.addObject("List", Mystart.readFactory());
+		}
+		if ( sourceType.equals("Annotation")) {
+			FactoryService factoryService=context.getBean(FactoryService.class);
+			mv.addObject("List", factoryService.readFactory());
+		}
+		
 		DBCoreLogger.printInfo("Factory read Test..");
 		return mv;
 	}
 	
-	@GetMapping(value="/readDataWithKey" )
-	@ResponseBody
-	public String readDataWithKey( @RequestParam("memberCorpid") String memberCorpid,
-									@RequestParam("factoryid") String factoryid ) {
-			
-		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-		Mystart.ready();
-		return Mystart.readFactoryWithKey(memberCorpid,factoryid);
+	@RequestMapping(value="insertFactoryForm")
+	public String insertFactoryForm() {
+		return "insertFactoryForm";
 	}
-
-	@GetMapping(value="/updateDataWithKey" )
+	
+	@RequestMapping(value="readFromSQLForm")
+	public String readFromSQLForm() {
+		return "readFromSQLForm";
+	}
+		
+	@RequestMapping(value="sessionTest", method=RequestMethod.GET)
 	@ResponseBody
-	public String updateDataWithKey( @RequestParam("memberCorpid") String memberCorpid,
-									@RequestParam("factoryid") String factoryid ) {
-			
+	public String sessionTest(@RequestParam("SessionNo") int SessionNo) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-		Mystart.ready();
-		return Mystart.updateFactoryWithKey(memberCorpid,factoryid);
+		
+		for(int i=0; i< SessionNo; i++)
+			Mystart.testDBCoreSesion();
+	
+		String Result= "Create Sessions :" + SessionNo;
+		return Result;
+	}
+	
+	/**
+	 * @param memberCorpid
+	 * @param factoryid
+	 * @param sourceType
+	 * @return
+	 */
+	@GetMapping(value="/readDataWithKey" )
+	public ModelAndView readDataWithKey( @RequestParam("memberCorpid") String memberCorpid,
+									@RequestParam("factoryid") String factoryid,
+									@RequestParam("sourceType") String sourceType) {
+		
+		ModelAndView mv=new ModelAndView("readDataWithKeyForm");
+		mv.addObject("sourceType", sourceType);
+		
+		if ( sourceType.equals("DAOImpl")) {	
+			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+			mv.addObject("FactoryId", Mystart.readFactoryWithKey(memberCorpid,factoryid));
+		}
+		if ( sourceType.equals("Annotation")) {
+			FactoryService factoryService=context.getBean(FactoryService.class);
+			mv.addObject("FactoryId", factoryService.readFactoryWithKey(memberCorpid,factoryid));
+		}
+		
+		return mv;
+	}
+	
+	@GetMapping(value="/updateDataWithKey")
+	@ResponseBody
+	public String updateDataWithKey( Factory myfactory,
+			@RequestParam("sourceType") String sourceType) {
+		String Result=null;
+		
+		if ( sourceType.equals("DAOImpl")) {		
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		Result= Mystart.updateFactoryWithKey(myfactory);
+		}
+		
+		if ( sourceType.equals("Annotation")) {
+			FactoryService factoryService=context.getBean(FactoryService.class);
+			Result=factoryService.updateFactoryWithKey(myfactory);
+		}
+		return Result;
 	}
 	
 	@GetMapping(value="/deleteDataWithKey" )
 	@ResponseBody
 	public String deleteDataWithKey( @RequestParam("memberCorpid") String memberCorpid,
-									@RequestParam("factoryid") String factoryid ) {
-			
-		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-		Mystart.ready();
-		return Mystart.deleteFactoryWithKey(memberCorpid,factoryid);
+									@RequestParam("factoryid") String factoryid,
+									@RequestParam("sourceType") String sourceType ) {
+		
+		String Result=null;
+		if ( sourceType.equals("DAOImpl")) {	
+			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+			Result= Mystart.deleteFactoryWithKey(memberCorpid,factoryid);
+}
+		
+		if ( sourceType.equals("Annotation")) {
+			FactoryService factoryService=context.getBean(FactoryService.class);
+			Result=factoryService.deleteFactoryWithKey(memberCorpid,factoryid);
+		}
+		return Result;
 	}
+	
+	@GetMapping(value="/insertFactory")
+	@ResponseBody
+	public String insertFactory( Factory myfactory) {
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		return Mystart.insertFactory(myfactory);
+	}
+	
+	@GetMapping(value="/readDataFromSQL" )
+	public ModelAndView readDataFromSQL( @RequestParam("SQLQuery") String SQLQuery,
+									@RequestParam("QueryType") String QueryType ) {
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		ModelAndView mv=new ModelAndView("FactoryList");
+		mv.addObject("sourceType", "DAOImpl");
+		mv.addObject("List", Mystart.readFactoryFromSQL(SQLQuery,QueryType));
+		return mv;
+	}
+	
 }

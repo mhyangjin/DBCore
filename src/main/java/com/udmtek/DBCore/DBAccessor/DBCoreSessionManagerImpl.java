@@ -15,7 +15,7 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /** Implementation of the DBSessionManager
  * @author julu1 <julu1 @ naver.com >
- * @version 
+ * @version version 0.1.0
  */
 @Component
 @Scope(value = "prototype" )
@@ -62,8 +62,6 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	
 	@Override
 	public DBCoreSession openSession() {
-		// TODO Auto-generated method stub
-		
 		DBCoreSession currSession=null;
 		currSession=findUnusingSession();
 		
@@ -73,8 +71,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	}
 	
 	@Override
-	public DBCoreSession openSession(int retryNo, int waitTime) {
-		// TODO Auto-generated method stub
+	public DBCoreSession openSession(int retryNo, long waitTime) {
 		DBCoreSession currSession=null;
 		if ( retryNo <=0 ) {
 			DBCoreLogger.printError("retryNo has to larger than 0");

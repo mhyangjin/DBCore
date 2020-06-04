@@ -13,10 +13,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.udmtek.DBCore.ComUtil.DBCoreLogger;
+import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
+
 
 /** Implementation of the DBCoreSession
  * @author julu1 <julu1 @ naver.com >
- * @version 
+ * @version version 0.1.0
  */
 @Component
 @Scope(value = "prototype")
@@ -31,12 +34,12 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	private int TransactionSeq=0;
 	private SessionFactory mySessionFactory=null;
 	private EntityManager myentityManager;
+	private boolean ReadOnly;
 	@Autowired
 	ApplicationContext context;
 	
 	@Override
 	public void readyConnect(SessionFactory argFactory, String argSessionName) {
-		// TODO Auto-generated constructor stub
 		mySessionFactory=argFactory;
 		SessionName=argSessionName;
 	}
@@ -65,7 +68,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 
 	@Override
 	public boolean beginTransaction(boolean ReadOnly) {
-		// TODO Auto-generated method stub
+		this.ReadOnly = ReadOnly;
 		currTransaction=thisSession.getTransaction();
 		if (TransactionSeq > 2147483647 ) {
 			TransactionSeq=1;
@@ -77,16 +80,16 @@ public class DBCoreSessionImpl implements DBCoreSession {
 
 	@Override
 	public boolean endTransaction(boolean CommitOK) {
-		// TODO Auto-generated method stub
 		boolean CommitResult=false;
 		if ( currTransaction == null )	{
 			//Exception throw
 			return CommitResult;
 		}
-		
+
 		try {
-			if ( CommitOK)
+			if ( this.ReadOnly==false && CommitOK)
 			{
+				DBCoreLogger.printInfo("COMMIT");
 				myentityManager.flush();
 				currTransaction.commit();
 			}
@@ -95,17 +98,15 @@ public class DBCoreSessionImpl implements DBCoreSession {
 			CommitResult=true;
 		} catch (Exception e)	 {
 			e.printStackTrace();
-			currTransaction.rollback();
+			throw (e);
 		}
-		finally {
-			currTransaction=null;
-		}
+		
+		currTransaction=null;
 		return CommitResult;
 	}
 	
 	@Override
 	public SessionFactory getSessionFactory() {
-		// TODO Auto-generated method stub
 		return mySessionFactory;
 	}
 	
@@ -114,11 +115,21 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		return myentityManager;
 	}
 	
+	@Override
+	@SuppressWarnings("rawtypes")
 	public <T> T getDAOImpl(Class<T> type) {
 		T TImpl=context.getBean( type);
-		DBCoreDAOJpa Tmp=(DBCoreDAOJpa) TImpl;
-		Tmp.setEntityManager(myentityManager);
+		((GenericDAOImpl) TImpl).setEntityManager(myentityManager);
 		return TImpl;	
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public GenericDAOImpl<?> getDAOImpl(String TableName) {
+		String DAOName=TableName + "DAOImpl";
+		GenericDAOImpl DAOImpl=(GenericDAOImpl)context.getBean(DAOName);
+		DAOImpl.setEntityManager(myentityManager);
+		return DAOImpl;	
 	}
 
 }

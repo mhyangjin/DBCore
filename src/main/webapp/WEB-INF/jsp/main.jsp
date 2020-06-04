@@ -10,8 +10,10 @@
 <% String path=request.getContextPath();
 %>
 <body>
-<a href="/sessionTest">testDBCoreSesion</a> : session test <br>
-<a href="/reaAlldData">/reaAlldDataTest</a> : data Read Test <br>
-<a href="/readDataWithKey">readData with key</a> : data Read Test <br>
+<a href="SessionPoolTestForm">Session test</a> : session pool test <br>
+<a href="reaAlldData?sourceType=DAOImpl">reaAlldDataTest</a> : using FactoryDAO->update, delete <br>
+<a href="insertFactoryForm">insert Factory</a> : using FactoryDAO <br>
+<a href="readFromSQLForm">reaAlldData using SQL/JPQL Test</a> : data Read Test <br>
+<a href="reaAlldData?sourceType=Annotation">update Factory using auto commit</a>: write Factory without Begin/End Session<br>
 </body>
 </html>

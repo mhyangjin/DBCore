@@ -3,14 +3,28 @@ package com.udmtek.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+
+/**
+ * @author julu1 <julu1 @ naver.com >
+ * @version 0.1.0
+ */
 @SuppressWarnings("serial")
+@Getter
+@Setter
+@ToString
 public class FactoryId implements Serializable {
 	protected String memberCorpid;
 	protected String factoryid;
 	
 	public FactoryId () {}
-	
+	public FactoryId(String memberCorpid, String factoryid) {
+		this.memberCorpid =memberCorpid;
+		this.factoryid = factoryid;
+	}
 	@Override
 	public boolean equals(Object o) {
 		if ( this == o ) return true;

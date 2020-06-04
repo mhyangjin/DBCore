@@ -4,24 +4,26 @@ import javax.persistence.EntityManager;
 
 import org.hibernate.SessionFactory;
 
+import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
+
 
 /**
  * interface DBCoreSession
  * @author julu1 <julu1 @ naver.com >
- * @version 0.0.1
+ * @version 0.1.0
  */
 public interface DBCoreSession{
 	/**
-	 * set Session Factory, Session Name in Empty DBCoreSession
+	 * set Session Factory and Session Name in Empty DBCoreSession
 	 * @param SessionFactory, String 
-	 * @return
+	 * @return void
 	 */
 	public void readyConnect(SessionFactory argFactory, String argSessionName);
 	
 	/**
 	 * get Session and create an EntityManager
 	 * @param 
-	 * @return return true if success otherwise false.
+	 * @return boolean : return true if success otherwise false.
 	 */
 	public boolean openSession();
 	/**
@@ -57,8 +59,26 @@ public interface DBCoreSession{
 	 */
 	public SessionFactory getSessionFactory();
 	
+	/**
+	 * get the EntityManager
+	 * @param
+	 * @return EntityManager
+	 */
 	public EntityManager getEntityManager();
 	
+	/**
+	 * get DAOImpl of T
+	 * @param
+	 * @return T
+	 */
 	public <T> T getDAOImpl(Class<T> type);
+	
+	/**
+	 * get DAOImpl using TableName
+	 * @param
+	 * @return GenericDAOImpl<?>
+	 */
+	public GenericDAOImpl<?> getDAOImpl(String TableName);
+
 
 }

@@ -8,12 +8,15 @@
 <title>Factory Info</title>
 </head>
 <body>
+${sourceType}<br>
 <c:forEach  var="List" items="${List}">
-
 ${List.memberCorpid} : ${List.factoryid}
- <a href="readDataWithKey?memberCorpid=${List.memberCorpid}&factoryid=${List.factoryid}">조회 </a>
-<a href="updateDataWithKey?memberCorpid=${List.memberCorpid}&factoryid=${List.factoryid}">수정</a>
-<a href="deleteDataWithKey?memberCorpid=${List.memberCorpid}&factoryid=${List.factoryid}">삭제</a>
+<c:url var="url" value="readDataWithKey">
+	<c:param name="memberCorpid" value="${List.memberCorpid}"/>
+	<c:param name="factoryid" value="${List.factoryid}"/>
+	<c:param name="sourceType" value="${sourceType}"/>
+</c:url>
+ <a href="${url}">조회 </a>
 <br>
 </c:forEach>
 </body>
