@@ -14,6 +14,7 @@ import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
  * @version 0.1.0
  */
 public interface DBCoreSession{
+
 	/**
 	 * set Session Factory and Session Name in Empty DBCoreSession
 	 * @param SessionFactory, String 
@@ -39,13 +40,35 @@ public interface DBCoreSession{
 	 * @return return true if success otherwise false.
 	 */
 	public boolean beginTransaction(boolean ReadOnly);
-	public Session getThisSession();
+	
 	/**
 	 * end the transaction
 	 * @param CommitOK (true:commit,false:rollback)
 	 * @return return true if success otherwise false.
 	 */
 	public boolean endTransaction(boolean CommitOK);
+
+	/**
+	 * get state of the current session
+	 * @param
+	 * @return State
+	 */
+	public State getSessionState();
+	
+	/**
+	 * get this session is open state or not.
+	 * @param
+	 * @return boolean return true if this session is open otherwise false
+	 */
+	public boolean isOpened();
+	
+	/**
+	 * get this session is begin transaction state or not
+	 * @param
+	 * @return boolean return true if already begin transaction otherwise false
+	 */
+	public boolean isbeginedTransacion();
+	
 	/**
 	 * get the transactionID
 	 * @param 

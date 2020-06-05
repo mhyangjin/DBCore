@@ -27,6 +27,7 @@ public class DBCoreConfigClass {
 	public Map<String,DBCoreSessionManager> getMap() {
 		return Collections.synchronizedMap(new HashMap<String,DBCoreSessionManager>());
 	}
+	
 	/**
 	 * make bean object of Set<DBCoreSession>
 	 * @return Set<DBCoreSession>
@@ -35,5 +36,11 @@ public class DBCoreConfigClass {
 	@Scope(value="prototype")
 	public Set<DBCoreSession> getList() {
 		return Collections.synchronizedSet(new HashSet<DBCoreSession>());
+	}
+	
+	@Bean(name="getUseSessionMap")
+	@Scope(value="prototype")
+	public Map<Thread, DBCoreSession> getUseSessionMap() {
+		return Collections.synchronizedMap(new HashMap<Thread, DBCoreSession>());
 	}
 }

@@ -64,7 +64,8 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	public DBCoreSession openSession() {
 		DBCoreSession currSession=null;
 		currSession=findUnusingSession();
-		
+		//set Thread Local variable
+		DBSession.set(currSession);
 		String msg="UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
 		DBCoreLogger.printInfo(msg);
 		return currSession;
@@ -99,20 +100,29 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 			else
 				break;
 		}
-		
+		if ( currSession != null)
+			//set Thread Local variable
+			DBSession.set(currSession);
+
 		String msg="[OPEN]UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
 		DBCoreLogger.printInfo(msg);
 	
 		return currSession;
 	}
 
-
+	@Override
+	public DBCoreSession getCurrentSession() {
+		return DBSession.get();
+	}
+	
 	@Override
 	public boolean closeSession(DBCoreSession currSession) {
 		boolean result=currSession.closeSession();
 		
 		unusingSessions.add(currSession);
 		usingSessions.remove(currSession);
+		//remove Thread Local variable
+		DBSession.remove();
 		String msg="[CLOSE]UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
 		DBCoreLogger.printInfo(msg);
 		return result;

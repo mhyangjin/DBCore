@@ -73,6 +73,7 @@ public class DBCoreTestClass {
 	
 	//FactoryDAO 를 이용한 all select 기능
 	public List<Factory> readFactory() {
+		
 		DBCoreSession currSession=myManager.openSession(3,1000);
 		if (currSession == null )
 			return null;
@@ -85,7 +86,6 @@ public class DBCoreTestClass {
 			FactoryDAOImpl factoryImpl=currSession.getDAOImpl(FactoryDAOImpl.class);
 			Factories = factoryImpl.getAll();
 			// -- <<  조회부분 끝  >> ---
-			
 			currSession.endTransaction(false);
 		}
 		catch ( Exception e) {
@@ -95,7 +95,14 @@ public class DBCoreTestClass {
 		}
 		finally {
 			myManager.closeSession(currSession);
-		}ession == null )
+		}
+		return Factories;
+	}
+	
+	//FactoryDAO의 primary key를 이용한 1건 조회 기능
+	public Factory readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
+		DBCoreSession currSession=myManager.openSession(3,1000);
+		if (currSession == null )
 			return null;
 		Factory findFactory=null;
 		boolean BeginOK=false;

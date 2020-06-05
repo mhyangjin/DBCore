@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  * @version 0.1.0
  */
 public class DBCoreLogger {
-	private static Logger logger=LoggerFactory.getLogger(DBCoreLogger.class);
+	private static Logger logger=LoggerFactory.getLogger("DBCoreLogger");
 	
 	/**
 	 * print info.
