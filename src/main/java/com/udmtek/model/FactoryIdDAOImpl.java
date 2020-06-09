@@ -8,8 +8,8 @@ import com.udmtek.DBCore.DAOModel.GenericKeyDAOImpl;
  * @version 0.1.0
  */
 @Component("FactoryIdDAOImpl")
-public class FactoryIdDAOImpl extends GenericKeyDAOImpl<FactoryId> {
+public class FactoryIdDAOImpl extends GenericKeyDAOImpl<FactoryIdDAO> {
 	public FactoryIdDAOImpl () {
-		super(FactoryId.class);
+		super(FactoryIdDAO.class);
 	}
 }

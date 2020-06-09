@@ -1,6 +1,7 @@
 package com.udmtek.DBCore.DBAccessor;
 
-import org.hibernate.SessionFactory;
+import javax.persistence.EntityManagerFactory;
+
 
 /**
  * management DBCoreSession set.
@@ -8,7 +9,18 @@ import org.hibernate.SessionFactory;
  * @version version 0.1.0
  */
 public interface DBCoreSessionManager{
-	
+	/**
+	 * This is for creating Thread local Variable.
+	 * It will be can get DBCoreSession in current thread.
+	 */
+	public static ThreadLocal<DBCoreSession> DBSession=new ThreadLocal<DBCoreSession>();	
+	/**
+	 * get opended session in current thread.
+	 * @param
+	 * @return DBCoreSession
+	 */
+	public static DBCoreSession getCurrentSession() { return DBSession.get();} 
+
 	/**
 	 * make connection with specified Database
 	 * @param String  : persistence-unit name in peristence.xml
@@ -52,7 +64,7 @@ public interface DBCoreSessionManager{
 	 * @param
 	 * @return SessionFactory
 	 */
-	public SessionFactory getSessionFactory();
+	public EntityManagerFactory getEntityFactory();
 	
 	/**
 	 * close all sessions. can't use DBCoreSessionManager any more.

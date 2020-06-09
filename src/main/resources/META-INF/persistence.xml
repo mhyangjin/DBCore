@@ -14,7 +14,9 @@
 			<property name="hibernate.hikari.minimumIdle" value="2"/>
 			<property name="hibernate.hikari.maximumPoolSize" value="5"/>
 			<property name="hibernate.connection.provider_class" 
-						value="com.zaxxer.hikari.hibernate.HikariConnectionProvider" />
+						value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider" />
+			<property name="hibernate.temp.use_jdbc_metadata_defaults" 
+						value="false" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="udmtmesdb">

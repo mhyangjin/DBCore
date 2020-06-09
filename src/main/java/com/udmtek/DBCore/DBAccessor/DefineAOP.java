@@ -1,7 +1,5 @@
 package com.udmtek.DBCore.DBAccessor;
 
-import java.lang.reflect.Field;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -41,18 +39,6 @@ public class DefineAOP {
 		 boolean BeginOK=false;
 		 try {
 			 BeginOK=currSession.beginTransaction(false);
-			 //호출한 class에 member 변수에 DBCoreSession이 선언되어 있으면  setting하여 준다.
-			 //DBCoreSession 상단에 @Setter annotation이 붙거나 "set"+"변수이름(첫글자 대문자)"로 선언된 함수가 있어야 한다.
-			 Object targetObject=joinpoint.getTarget();
-			 Field[] attrs=targetObject.getClass().getDeclaredFields();
-			 for (int i=0; i < attrs.length ; i++)  {
-				  Field attr=attrs[i];
-				  String AttrName=attr.getName();
-				  if (  attr.getType().getName().endsWith("DBCoreSession")) {
-					  String SetterName="set" + AttrName.toUpperCase().charAt(0) + AttrName.substring(1);
-					  targetObject.getClass().getMethod(SetterName,DBCoreSession.class).invoke(targetObject, currSession);
-				  }
-			  }
 			 //////////////////원래 호출하려는 method////////////////
 			 result=joinpoint.proceed(joinpoint.getArgs());
 			 //////////////////////////////////////////////////
@@ -84,18 +70,6 @@ public class DefineAOP {
 		 boolean BeginOK=false;
 		try {
 			BeginOK=currSession.beginTransaction(true);
-			 //호출한 class에 member 변수에 DBCoreSession이 선언되어 있으면  setting하여 준다.
-			 //DBCoreSession 상단에 @Setter annotation이 붙거나 "set"+"변수이름(첫글자 대문자)"로 선언된 함수가 있어야 한다.
-			 Object targetObject=joinpoint.getTarget();
-			 Field[] attrs=targetObject.getClass().getDeclaredFields();
-			 for (int i=0; i < attrs.length ; i++)  {
-				  Field attr=attrs[i];
-				  String AttrName=attr.getName();
-				  if (  attr.getType().getName().endsWith("DBCoreSession")) {
-					  String SetterName="set" + AttrName.toUpperCase().charAt(0) + AttrName.substring(1);
-					  targetObject.getClass().getMethod(SetterName,DBCoreSession.class).invoke(targetObject, currSession);
-				  }
-			  }
 			 //////////////////원래 호출하려는 method////////////////
 			 result=joinpoint.proceed(joinpoint.getArgs());
 			 //////////////////////////////////////////////////

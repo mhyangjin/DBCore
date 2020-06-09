@@ -5,20 +5,22 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
+import com.udmtek.DBCore.DBAccessor.DBCoreSession;
+import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 
 
 /**
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
-public class GenericDAOImpl <T extends EntityDAO> implements GenericDAO<T> {
+public class GenericDAOImpl <T> implements GenericDAO<T> {
 	private Class<T> type;
-	protected EntityManager myEntityMgr=null;
 	@Autowired
 	ApplicationContext context;
 	
@@ -27,25 +29,13 @@ public class GenericDAOImpl <T extends EntityDAO> implements GenericDAO<T> {
 		this.type = type;
 	}
 	
-	public void setEntityManager(EntityManager argEntityMgr) {
-		this.myEntityMgr = argEntityMgr;
-	}
 	
 	@Override
 	public T get(Serializable key) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
-		return (T) myEntityMgr.find(type, key);
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return (T) currSession.find(type, key);
 	}
 
-	@Override
-	public Serializable getKey(T object) {
-		object.getKey();
-		return null;
-	}
-	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public GenericKeyDAOImpl<?> getKeyDAOImpl(String tableName) {
@@ -57,69 +47,47 @@ public class GenericDAOImpl <T extends EntityDAO> implements GenericDAO<T> {
 
 	@Override
 	public List<T> getfromJPQL(String Jquery) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
-		return myEntityMgr.createQuery(Jquery,type).getResultList();
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return currSession.createQuery(Jquery,type).getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getfromSQL(String sqlquery) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
-		return myEntityMgr.createNativeQuery(sqlquery,type).getResultList();
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return currSession.createNativeQuery(sqlquery,type).getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getAll() {
-			if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
-	
-		return myEntityMgr.createQuery("select m from " + type.getName() + " m").getResultList();
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return currSession.createQuery("select m from " + type.getName() + " m").getResultList();
 	}
 
 	@Override
 	public void insert(T object) throws DataAccessException {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
-		}
-		myEntityMgr.persist(object);
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		currSession.persist(object);
 	}
 
 	@Override
 	public void save(T Object) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
-		}
-		myEntityMgr.merge(Object);
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		currSession.merge(Object);
 	}
 
 	@Override
 	public void delete(T object) throws DataAccessException {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
-		}
-		myEntityMgr.remove(object);
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		currSession.remove(object);
 	}
 	
 	@Override
 	public void delete(Serializable object) throws DataAccessException {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
-		}
+		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 		T findObject=get(object);
-		myEntityMgr.remove(findObject);
+		currSession.remove(findObject);
 	}
 	
 }

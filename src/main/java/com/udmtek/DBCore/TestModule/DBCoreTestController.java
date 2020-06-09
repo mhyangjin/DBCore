@@ -12,7 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
-import com.udmtek.model.Factory;
+import com.udmtek.model.FactoryDAO;
 
 /**
  * @author julu1 <julu1 @ naver.com >
@@ -41,10 +41,12 @@ public class DBCoreTestController {
 		ModelAndView mv=new ModelAndView("FactoryList");
 		mv.addObject("sourceType",sourceType);
 		if ( sourceType.equals("DAOImpl")) {
+			DBCoreLogger.printInfo("Factory read Test..DAOImpl");
 			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 			mv.addObject("List", Mystart.readFactory());
 		}
 		if ( sourceType.equals("Annotation")) {
+			DBCoreLogger.printInfo("Factory read Test..Annotation");
 			FactoryService factoryService=context.getBean(FactoryService.class);
 			mv.addObject("List", factoryService.readFactory());
 		}
@@ -103,7 +105,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/updateDataWithKey")
 	@ResponseBody
-	public String updateDataWithKey( Factory myfactory,
+	public String updateDataWithKey( FactoryDAO myfactory,
 			@RequestParam("sourceType") String sourceType) {
 		String Result=null;
 		
@@ -140,7 +142,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/insertFactory")
 	@ResponseBody
-	public String insertFactory( Factory myfactory) {
+	public String insertFactory( FactoryDAO myfactory) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 		return Mystart.insertFactory(myfactory);
 	}

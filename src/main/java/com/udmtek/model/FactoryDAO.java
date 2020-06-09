@@ -12,8 +12,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.CreationTimestamp;
-
-import com.udmtek.DBCore.DAOModel.EntityDAO;
+import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +24,7 @@ import lombok.ToString;
  */
 @Entity
 @Table(name="factory")
-@IdClass(FactoryId.class)
+@IdClass(FactoryIdDAO.class)
 //update SQL 생성 시 빈칼럼은 제거한다.
 @org.hibernate.annotations.DynamicUpdate
 //insert SQL 생성 시 빈칼럼은 제거한다.
@@ -33,7 +32,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Factory implements EntityDAO{
+public class FactoryDAO extends GenericDAOImpl<FactoryDAO>{
 	
 	@Id	@Column(name="member_corpid")
 	private String memberCorpid;
@@ -108,20 +107,9 @@ public class Factory implements EntityDAO{
 	private String weekStartNm;
 
 	@Transient
-	FactoryId Key=null;
+	FactoryIdDAO Key=null;
 	
-	@Override
-	public FactoryId getKey() {
-		// TODO Auto-generated method stub
-		if (Key == null)
-		{
-			Key=new FactoryId();
-			if ( this.memberCorpid.length() > 0)
-				Key.setMemberCorpid(this.memberCorpid);
-			if ( this.factoryid.length() > 0 )
-				Key.setFactoryid(this.factoryid);
-		}
-		return Key;
+	public FactoryDAO () {
+		super(FactoryDAO.class);
 	}
-	
 }

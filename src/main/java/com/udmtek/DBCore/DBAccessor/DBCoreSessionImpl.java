@@ -1,9 +1,9 @@
-/**
- * 
- */
 package com.udmtek.DBCore.DBAccessor;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -25,114 +25,115 @@ import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
 @Scope(value = "prototype")
 @ComponentScan("com.udmtek.model")
 public class DBCoreSessionImpl implements DBCoreSession {
-	/**
-	 * 
-	 */
-	private Session thisSession=null;
-	private Transaction currTransaction=null;
-	private String SessionName="";
-	private int TransactionSeq=0;
-	private SessionFactory mySessionFactory=null;
-	private EntityManager myentityManager;
-	private boolean ReadOnly;
+	public enum State { 
+		INIT,
+		OPENDED,
+		BEGINED ,
+		End;
+		}
+  
 	@Autowired
 	ApplicationContext context;
 	
+	private EntityManagerFactory myEntityFactory=null;
+	private String SessionName="";
+	State sessionState;	
+
+	private EntityManager thisSession=null;
+	private int EntityManagerSeq=0;
+	
+	private int TransactionSeq=0;
+	private boolean ReadOnly;
+	
+	
 	@Override
-	public void readyConnect(SessionFactory argFactory, String argSessionName) {
-		mySessionFactory=argFactory;
+	public void readyConnect(EntityManagerFactory argFactory, String argSessionName) {
+		myEntityFactory=argFactory;
 		SessionName=argSessionName;
+		sessionState=State.INIT;
 	}
+	
 	@Override
 	public boolean openSession()
 	{
-		thisSession=mySessionFactory.openSession();
-		myentityManager=mySessionFactory.createEntityManager();
+		thisSession=myEntityFactory.createEntityManager();
+		if (EntityManagerSeq >= 2147483647 ) {
+			EntityManagerSeq=1;
+		}
+		EntityManagerSeq++;
+		sessionState=State.OPENDED;
 		return true;
 	}
 	
 	@Override
 	public boolean closeSession() {
 		thisSession.close();
-		myentityManager.close();
 		thisSession=null;
-		myentityManager=null;
+		sessionState=State.INIT;
 		return true;
 	}
 	
-	public Session getThisSession() {
+	public EntityManager getThisSession() {
 		return thisSession;
 	}
 	
 	@Override
 	public String getTransactionID() {
-		return SessionName+"_"+TransactionSeq;
+		String TransactionID=SessionName;
+		switch (sessionState) {
+		case INIT:
+			TransactionID = TransactionID + ":";
+			break;
+		case OPENDED:
+			TransactionID = TransactionID +"["+EntityManagerSeq +":]";
+			break;
+		case BEGINED:
+			TransactionID = TransactionID +"["+EntityManagerSeq +":"+TransactionSeq + "]";
+		default:
+			break;
+		}
+		return TransactionID;
 	}
 
 	@Override
 	public boolean beginTransaction(boolean ReadOnly) {
 		this.ReadOnly = ReadOnly;
-		currTransaction=thisSession.getTransaction();
+		thisSession.getTransaction().begin();
+		
 		if (TransactionSeq >= 2147483647 ) {
 			TransactionSeq=1;
 		}
 		TransactionSeq++;
-		currTransaction.begin();
+		sessionState=State.BEGINED;
 		return true;
 	}
 
 	@Override
 	public boolean endTransaction(boolean CommitOK) {
 		boolean CommitResult=false;
-		if ( currTransaction == null )	{
-			//Exception throw
-			return CommitResult;
-		}
-
+		
 		try {
 			if ( this.ReadOnly==false && CommitOK)
 			{
 				DBCoreLogger.printInfo("COMMIT");
-				myentityManager.flush();
-				currTransaction.commit();
+				thisSession.flush();
+				thisSession.getTransaction().commit();
 			}
 			else
-				currTransaction.rollback();
+				thisSession.getTransaction().rollback();
 			CommitResult=true;
 		} catch (Exception e)	 {
 			e.printStackTrace();
 			throw (e);
 		}
 		
-		currTransaction=null;
+		sessionState=State.INIT;
 		return CommitResult;
 	}
 	
 	@Override
-	public SessionFactory getSessionFactory() {
-		return mySessionFactory;
-	}
-	
-	@Override
-	public EntityManager getEntityManager() {
-		return myentityManager;
-	}
-	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public <T> T getDAOImpl(Class<T> type) {
-		T TImpl=context.getBean( type);
-		((GenericDAOImpl) TImpl).setEntityManager(myentityManager);
-		return TImpl;	
-	}
-
-	@SuppressWarnings("rawtypes")
-	@Override
-	public GenericDAOImpl<?> getDAOImpl(String TableName) {
-		String DAOName=TableName + "DAOImpl";
-		GenericDAOImpl DAOImpl=(GenericDAOImpl)context.getBean(DAOName);
-		DAOImpl.setEntityManager(myentityManager);
-		return DAOImpl;	
+	public EntityManagerFactory getEntityFactory() {
+		return myEntityFactory;
 	}
 
 }

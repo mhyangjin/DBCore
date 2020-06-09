@@ -16,12 +16,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class FactoryId implements Serializable {
+public class FactoryIdDAO implements Serializable {
 	protected String memberCorpid;
 	protected String factoryid;
 	
-	public FactoryId () {}
-	public FactoryId(String memberCorpid, String factoryid) {
+	public FactoryIdDAO () {}
+	public FactoryIdDAO(String memberCorpid, String factoryid) {
 		this.memberCorpid =memberCorpid;
 		this.factoryid = factoryid;
 	}
@@ -30,7 +30,7 @@ public class FactoryId implements Serializable {
 		if ( this == o ) return true;
 		if ( o == null ) return false;
 		if ( o.getClass() != this.getClass() ) return false;
-		FactoryId oFactoryID=(FactoryId) o;
+		FactoryIdDAO oFactoryID=(FactoryIdDAO) o;
 		return  memberCorpid.equals(oFactoryID.memberCorpid) &&	factoryid.equals(oFactoryID.factoryid);
 	}
 	
