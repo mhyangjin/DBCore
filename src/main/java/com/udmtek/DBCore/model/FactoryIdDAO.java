@@ -1,4 +1,4 @@
-package com.udmtek.model;
+package com.udmtek.DBCore.model;
 
 import java.io.Serializable;
 import java.util.Objects;

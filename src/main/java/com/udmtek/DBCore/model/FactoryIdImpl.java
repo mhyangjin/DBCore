@@ -1,4 +1,4 @@
-package com.udmtek.model;
+package com.udmtek.DBCore.model;
 
 import org.springframework.stereotype.Component;
 import com.udmtek.DBCore.DAOModel.GenericKeyDAOImpl;
@@ -7,9 +7,9 @@ import com.udmtek.DBCore.DAOModel.GenericKeyDAOImpl;
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
-@Component("FactoryIdDAOImpl")
-public class FactoryIdDAOImpl extends GenericKeyDAOImpl<FactoryIdDAO> {
-	public FactoryIdDAOImpl () {
+@Component("FactoryIdImpl")
+public class FactoryIdImpl extends GenericKeyDAOImpl<FactoryIdDAO> {
+	public FactoryIdImpl () {
 		super(FactoryIdDAO.class);
 	}
 }

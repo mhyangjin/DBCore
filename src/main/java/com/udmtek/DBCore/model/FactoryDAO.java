@@ -1,4 +1,4 @@
-package com.udmtek.model;
+package com.udmtek.DBCore.model;
 
 import java.util.Date;
 
@@ -12,7 +12,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.CreationTimestamp;
-import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
+
+import com.udmtek.DBCore.DAOModel.EntityDAO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +33,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class FactoryDAO extends GenericDAOImpl<FactoryDAO>{
+public class FactoryDAO implements EntityDAO {
 	
 	@Id	@Column(name="member_corpid")
 	private String memberCorpid;
@@ -105,11 +106,24 @@ public class FactoryDAO extends GenericDAOImpl<FactoryDAO>{
 	
 	@Column(name="week_start_nm")
 	private String weekStartNm;
-
-	@Transient
-	FactoryIdDAO Key=null;
 	
-	public FactoryDAO () {
-		super(FactoryDAO.class);
+	@Transient
+	FactoryIdDAO key=null;
+	
+	public FactoryIdDAO getKey()
+	{
+		if ( key == null)
+			key = new FactoryIdDAO(this.memberCorpid, this.factoryid);
+		return key;
 	}
+	
+	public FactoryIdDAO getKey(String mCorpid,String FactoryID)
+	{
+		if ( key == null)
+			key = new FactoryIdDAO(mCorpid, FactoryID);
+		return key;
+	}
+	
+	
+	
 }

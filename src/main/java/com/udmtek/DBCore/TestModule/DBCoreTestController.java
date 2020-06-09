@@ -12,7 +12,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
-import com.udmtek.model.FactoryDAO;
+import com.udmtek.DBCore.model.FactoryInfo;
+
 
 /**
  * @author julu1 <julu1 @ naver.com >
@@ -105,7 +106,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/updateDataWithKey")
 	@ResponseBody
-	public String updateDataWithKey( FactoryDAO myfactory,
+	public String updateDataWithKey( FactoryInfo myfactory,
 			@RequestParam("sourceType") String sourceType) {
 		String Result=null;
 		
@@ -142,7 +143,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/insertFactory")
 	@ResponseBody
-	public String insertFactory( FactoryDAO myfactory) {
+	public String insertFactory( FactoryInfo myfactory) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 		return Mystart.insertFactory(myfactory);
 	}

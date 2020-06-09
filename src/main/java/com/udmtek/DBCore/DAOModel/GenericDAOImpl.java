@@ -33,7 +33,7 @@ public class GenericDAOImpl <T> implements GenericDAO<T> {
 	@Override
 	public T get(Serializable key) {
 		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		return (T) currSession.find(type, key);
+		return (T) currSession.find(type.getSuperclass(), key);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -45,24 +45,25 @@ public class GenericDAOImpl <T> implements GenericDAO<T> {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getfromJPQL(String Jquery) {
 		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		return currSession.createQuery(Jquery,type).getResultList();
+		return currSession.createQuery(Jquery).getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getfromSQL(String sqlquery) {
 		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		return currSession.createNativeQuery(sqlquery,type).getResultList();
+		return currSession.createNativeQuery(sqlquery,type.getSuperclass()).getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getAll() {
 		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		return currSession.createQuery("select m from " + type.getName() + " m").getResultList();
+		return currSession.createQuery("select m from " + type.getSuperclass().getName() + " m").getResultList();
 	}
 
 	@Override

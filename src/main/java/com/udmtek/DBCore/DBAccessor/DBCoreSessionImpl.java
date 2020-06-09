@@ -23,7 +23,6 @@ import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
  */
 @Component
 @Scope(value = "prototype")
-@ComponentScan("com.udmtek.model")
 public class DBCoreSessionImpl implements DBCoreSession {
 	public enum State { 
 		INIT,

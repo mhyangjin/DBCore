@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreReadTransactional;
 import com.udmtek.DBCore.DBAccessor.DBCoreTransactional;
-import com.udmtek.model.FactoryDAO;
-import com.udmtek.model.FactoryDAOImpl;
-import com.udmtek.model.FactoryIdDAO;
-import com.udmtek.model.FactoryIdDAOImpl;
+import com.udmtek.DBCore.model.FactoryIdDAO;
+import com.udmtek.DBCore.model.FactoryImpl;
+import com.udmtek.DBCore.model.FactoryInfo;
 
 /**
  * @author julu1 <julu1 @ naver.com >
@@ -26,10 +25,10 @@ public class FactoryService{
 	
 	//FactoryDAO 를 이용한 all select 기능
 	@DBCoreReadTransactional(PersistUnit = "myLocalDB")
-	public List<FactoryDAO>  readFactory( ) {
+	public List<FactoryInfo>  readFactory( ) {
 		//--- << 조회 부분 시작 >> ---
-		FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
-		List<FactoryDAO> Factories = factoryImpl.getAll();
+		FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
+		List<FactoryInfo> Factories = factoryImpl.getAll();
 		// -- <<  조회 부분 끝  >> ---
 		DBCoreLogger.printInfo("findFactory" + Factories.size());
 		return Factories;
@@ -38,11 +37,11 @@ public class FactoryService{
 	
 	//FactoryDAO의 primary key를 이용한 1건 조회 기능
 	@DBCoreReadTransactional(PersistUnit = "myLocalDB")
-	public FactoryDAO readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
+	public FactoryInfo readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
 		//--- << 조회 부분 시작 >> ---
-		FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+		FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 		FactoryIdDAO factoryKey=new FactoryIdDAO(argmemberCorpId,argfactoryId );		//key entity 생성
-		FactoryDAO findFactory=(FactoryDAO)factoryImpl.get((Serializable)factoryKey); //key entity를 이용한 조회
+		FactoryInfo findFactory=(FactoryInfo)factoryImpl.get((Serializable)factoryKey); //key entity를 이용한 조회
 		// -- <<  조회 부분 끝  >> ---
 		DBCoreLogger.printInfo("findFactory" + findFactory.getFactoryid());
 		return findFactory;
@@ -50,14 +49,10 @@ public class FactoryService{
 
 	//FactoryDAO의 update 기능 (1건)
 	@DBCoreTransactional(PersistUnit = "myLocalDB")
-	public String updateFactoryWithKey (FactoryDAO myfactory) {
+	public String updateFactoryWithKey (FactoryInfo myfactory) {
 			//--- << update 부분 시작 >> ---
-		FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
-		FactoryIdDAOImpl factoryIdImpl = context.getBean(FactoryIdDAOImpl.class);; //Key검증을 위해 IdDAO를 생성
-		if ( factoryIdImpl.isValid(myfactory.getKey()) )	//Key 값이 유효한지 확인한다.
-		{
-			factoryImpl.save( myfactory);					//이상없으면 저장
-		}
+		FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
+		factoryImpl.save( myfactory);					//이상없으면 저장
 		// -- <<  update 부분 끝  >> ---
 		String result="Update OK";
 		return result;
@@ -68,7 +63,7 @@ public class FactoryService{
 	@DBCoreTransactional(PersistUnit = "myLocalDB")
 	public String deleteFactoryWithKey (String argmemberCorpId,String argfactoryId) {
 		//--- << delete 부분 시작 >> ---
-		FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+		FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 		FactoryIdDAO factoryKey=new FactoryIdDAO(argmemberCorpId,argfactoryId );			//key entity 생성
 		factoryImpl.delete( factoryKey);											//delete Call 
 		// -- << delete 부분 끝  >> ---

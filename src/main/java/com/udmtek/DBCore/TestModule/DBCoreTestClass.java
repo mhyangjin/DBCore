@@ -11,10 +11,10 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
-import com.udmtek.model.FactoryDAO;
-import com.udmtek.model.FactoryDAOImpl;
-import com.udmtek.model.FactoryIdDAO;
-import com.udmtek.model.FactoryIdDAOImpl;
+import com.udmtek.DBCore.model.FactoryIdDAO;
+import com.udmtek.DBCore.model.FactoryImpl;
+import com.udmtek.DBCore.model.FactoryInfo;
+
 
 /**
  * @author julu1 <julu1 @ naver.com >
@@ -72,17 +72,17 @@ public class DBCoreTestClass {
 	}
 	
 	//FactoryDAO 를 이용한 all select 기능
-	public List<FactoryDAO> readFactory() {
+	public List<FactoryInfo> readFactory() {
 		DBCoreSession currSession=myManager.openSession(3,1000);
 		if (currSession == null )
 			return null;
-		List<FactoryDAO> Factories = null;
+		List<FactoryInfo> Factories = null;
 		boolean BeginOK=false;
 		
 		try  {
 			BeginOK=currSession.beginTransaction(true);
 			//--- << 조회 부분 시작 >> ---
-			FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+			FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 			Factories = factoryImpl.getAll();
 			// -- <<  조회부분 끝  >> ---
 			
@@ -102,19 +102,19 @@ public class DBCoreTestClass {
 	}
 	
 	//FactoryDAO의 primary key를 이용한 1건 조회 기능
-		public FactoryDAO readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
+		public FactoryInfo readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
 			DBCoreSession currSession=myManager.openSession(3,1000);
 			if (currSession == null )
 				return null;
-			FactoryDAO findFactory=null;
+			FactoryInfo findFactory=null;
 			boolean BeginOK=false;
 			try {
 				BeginOK=currSession.beginTransaction(true);
 				DBCoreLogger.printInfo("memberCorpID:" + argmemberCorpId + " factoryId:" + argfactoryId);
 				//--- << 조회 부분 시작 >> ---
-				FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+				FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 				FactoryIdDAO factoryKey=new FactoryIdDAO(argmemberCorpId,argfactoryId );		//key entity 생성
-				findFactory=(FactoryDAO)factoryImpl.get((Serializable)factoryKey); //key entity를 이용한 조회
+				findFactory=(FactoryInfo)factoryImpl.get((Serializable)factoryKey); //key entity를 이용한 조회
 				// -- <<  조회 부분 끝  >> ---
 				
 				currSession.endTransaction(false);
@@ -131,7 +131,7 @@ public class DBCoreTestClass {
 		}
 
 	//FactoryDAO의 update 기능 (1건)
-	public String updateFactoryWithKey (FactoryDAO myfactory) {
+	public String updateFactoryWithKey (FactoryInfo myfactory) {
 		DBCoreSession currSession=null;
 		currSession = myManager.openSession(3,1000);
 		if (currSession == null )
@@ -141,12 +141,8 @@ public class DBCoreTestClass {
 			BeginOK=currSession.beginTransaction(false);
 	
 			//--- << update 부분 시작 >> ---
-			FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
-			FactoryIdDAOImpl factoryIdImpl = context.getBean(FactoryIdDAOImpl.class);; //Key검증을 위해 IdDAO를 생성
-			if ( factoryIdImpl.isValid(myfactory.getKey()) )	//Key 값이 유효한지 확인한다.
-			{
-				factoryImpl.save( myfactory);					//이상없으면 저장
-			}
+			FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
+			factoryImpl.save( myfactory);					//이상없으면 저장
 			// -- <<  update 부분 끝  >> ---
 			
 			currSession.endTransaction(true);
@@ -174,7 +170,7 @@ public class DBCoreTestClass {
 				
 			BeginOK=currSession.beginTransaction(false);
 			//--- << delete 부분 시작 >> ---
-			FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+			FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 			FactoryIdDAO factoryKey=new FactoryIdDAO(argmemberCorpId,argfactoryId );			//key entity 생성
 			factoryImpl.delete( factoryKey);											//delete Call 
 			// -- << delete 부분 끝  >> ---
@@ -194,7 +190,7 @@ public class DBCoreTestClass {
 	}
 	
 	//FactoryDAO의 insert 기능 (1건)
-	public String insertFactory (FactoryDAO myfactory) {
+	public String insertFactory (FactoryInfo myfactory) {
 		DBCoreSession currSession=null;
 		String result="insert OK";
 		
@@ -207,7 +203,7 @@ public class DBCoreTestClass {
 				
 			BeginOK=currSession.beginTransaction(false);
 			//--- << insert 부분 시작 >> ---
-			FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+			FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 			factoryImpl.insert( myfactory);
 			// -- <<  insert 부분 끝  >> ---
 			currSession.endTransaction(true);
@@ -227,25 +223,25 @@ public class DBCoreTestClass {
 	
 
 	//FactoryDAO의 native SQL. or JPQL 을 이횽한 select 기능
-	public List<FactoryDAO> readFactoryFromSQL(String Query, String QueryType) {
+	public List<FactoryInfo> readFactoryFromSQL(String Query, String QueryType) {
 		DBCoreSession currSession=myManager.openSession(3,1000);
 		if (currSession == null )
 			return null;
-		List<FactoryDAO> Factories=null;
+		List<FactoryInfo> Factories=null;
 		boolean BeginOK=false;
 		try {
 			BeginOK=currSession.beginTransaction(true);
 			if (QueryType.equals("SQL")) { 
 				//SQL이면 native Query로 수행
 				//--- << 조회 부분 시작 >> ---
-				FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+				FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 				Factories=factoryImpl.getfromSQL(Query);
 				// -- <<  조회부분 끝  >> ---
 			}
 			if (QueryType.equals("JPQL")) { 
 				//JPQL이면 JPQL Query로 수행
 				//--- << 조회 부분 시작 >> ---
-				FactoryDAOImpl factoryImpl=context.getBean(FactoryDAOImpl.class);
+				FactoryImpl factoryImpl=context.getBean(FactoryImpl.class);
 				Factories=factoryImpl.getfromJPQL(Query);
 				// -- <<  조회부분 끝  >> ---
 			}
