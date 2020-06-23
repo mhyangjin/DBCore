@@ -40,6 +40,7 @@ public interface DBCoreSession{
 	 * @return return true if success otherwise false.
 	 */
 	public boolean beginTransaction(boolean ReadOnly);
+	
 	public EntityManager getThisSession();
 	/**
 	 * end the transaction

@@ -1,4 +1,4 @@
-package com.udmtek.DBCore.model;
+package com.udmtek.DBCoreTest.model;
 
 import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
 

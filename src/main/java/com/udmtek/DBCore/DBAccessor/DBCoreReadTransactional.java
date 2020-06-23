@@ -16,5 +16,5 @@ public @interface DBCoreReadTransactional {
 	/**
 	 * PersisUnit : persistence-unit name.
 	 */
-	String PersistUnit();
+	String value()  default "default";
 }

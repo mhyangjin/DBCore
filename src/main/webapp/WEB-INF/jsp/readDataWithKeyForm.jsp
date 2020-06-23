@@ -15,7 +15,7 @@ ${sourceType}<br>
 <input type="hidden" name="sourceType" value="${sourceType}">
 <input type="submit" value="삭제" >
 </form>
-<form name="Factory" action="updateDataWithKey" method="get" accept-charset="UTF-8">
+<form name="FactoryInfo" action="updateDataWithKey" method="get" accept-charset="UTF-8">
 <table > 
 <tr><td>memberCorpid:</td><td>${FactoryId.memberCorpid}</td></tr>
 <tr><td>factoryid   :</td><td>${FactoryId.factoryid}</td></tr>

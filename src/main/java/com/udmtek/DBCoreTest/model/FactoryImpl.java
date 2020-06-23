@@ -1,4 +1,4 @@
-package com.udmtek.DBCore.model;
+package com.udmtek.DBCoreTest.model;
  
 import org.springframework.stereotype.Repository;
 import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
@@ -8,8 +8,10 @@ import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
  * @version 0.1.0
  */
 @Repository("FactoryImpl")
-public class FactoryImpl extends GenericDAOImpl<FactoryInfo> {
+public class FactoryImpl extends GenericDAOImpl<FactoryDAO> {
 public FactoryImpl () {
-		super(FactoryInfo.class);
+		super(FactoryDAO.class);
 	}
+
+
 }

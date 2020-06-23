@@ -7,7 +7,7 @@ import java.util.List;
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
-public interface GenericDAO <T> {
+public interface GenericDAO <T extends Entity> {
 	/**
 	 * find an Entity of T from the database using primary keys
 	 * @param
@@ -15,12 +15,6 @@ public interface GenericDAO <T> {
 	 */
 	public T get(Serializable key);
 
-	/**
-	 * create, and return DAOImpl of primary key of specified table using tableName
-	 * @param
-	 * @return GenericKeyDAOImpl<?>
-	 */
-	public GenericKeyDAOImpl<?> getKeyDAOImpl(String tableName);
 	/**
 	 * find all entities from the database
 	 * @param

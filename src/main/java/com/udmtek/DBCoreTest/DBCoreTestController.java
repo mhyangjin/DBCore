@@ -1,4 +1,6 @@
-package com.udmtek.DBCore.TestModule;
+package com.udmtek.DBCoreTest;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -11,8 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
-import com.udmtek.DBCore.model.FactoryInfo;
+import com.udmtek.DBCoreTest.model.FactoryDAO;
+import com.udmtek.DBCoreTest.model.FactoryInfo;
 
 
 /**
@@ -23,14 +25,16 @@ import com.udmtek.DBCore.model.FactoryInfo;
 public class DBCoreTestController {
 	@Autowired
 	ApplicationContext context;
-	@Autowired
-	DBCoreAccessManager DBAccessor;
 
+	
 	@RequestMapping(value="/")
 	public String testGuid() {
+
+		DBCoreLogger.printInfo("testGuid");
 		return "main";
+		
 	}
-	
+
 	@RequestMapping(value="SessionPoolTestForm")
 	public String SessionPoolTestForm() {
 		return "SessionPoolTestForm";
@@ -70,7 +74,6 @@ public class DBCoreTestController {
 	@ResponseBody
 	public String sessionTest(@RequestParam("SessionNo") int SessionNo) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-		
 		for(int i=0; i< SessionNo; i++)
 			Mystart.testDBCoreSesion();
 	
@@ -94,7 +97,8 @@ public class DBCoreTestController {
 		
 		if ( sourceType.equals("DAOImpl")) {	
 			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-			mv.addObject("FactoryId", Mystart.readFactoryWithKey(memberCorpid,factoryid));
+			FactoryDAO factory=(FactoryDAO) Mystart.readFactoryWithKey(memberCorpid,factoryid);
+			mv.addObject("FactoryId",factory );
 		}
 		if ( sourceType.equals("Annotation")) {
 			FactoryService factoryService=context.getBean(FactoryService.class);

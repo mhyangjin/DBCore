@@ -1,22 +1,21 @@
 package com.udmtek.DBCore.ComUtil;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
-import com.udmtek.DBCore.DBAccessor.DefineAOP;
+import org.springframework.stereotype.Component;
+;
 
 /**
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
+//@Component
+//@Aspect
 public class LogAOP {
-	@Autowired
-	DBCoreAccessManager DBAccessor;
-	private static final Logger logger=LoggerFactory.getLogger(DefineAOP.class);
+	private static final Logger logger=LoggerFactory.getLogger(LogAOP.class);
 	
 	public LogAOP() {
 		// TODO Auto-generated constructor stub
@@ -27,8 +26,8 @@ public class LogAOP {
 	 * @param
 	 * @return void
 	 */
-	@Before("execution(public * com.udmtek.DBCore.DBAccessor..*.*(..))")
+	@Before("execution(public * com.udmtek.DBCore.*..*.*(..))")
 	public void logBefore(JoinPoint joinpoint) {
-		logger.info("[DBCore] The {} begins",joinpoint.getSignature());
+		logger.info("[DBCore] The {} begins",joinpoint.getSignature()); 
 	}
 }

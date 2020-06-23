@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
-public interface GenericKeyDAO  <T extends Serializable> {
+public interface EntityKey extends Serializable {
 	/**
 	 * get column names 
 	 * @param
@@ -18,6 +18,6 @@ public interface GenericKeyDAO  <T extends Serializable> {
 	 * @param
 	 * @return boolean : return false if one or more is empty, or not true.
 	 */
-	public boolean isValid(T object);
+	public boolean isValid();
 
 }

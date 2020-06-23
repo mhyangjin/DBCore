@@ -15,5 +15,9 @@ public enum SessionStateEnum {
 	
 	SessionStateEnum(String string, List<String> methods) {
 		this.methods = methods;
-	} 
+	}
+	
+	public boolean isPossibleProcess(String Next) {
+		return (methods.contains(Next));
+	}
 }

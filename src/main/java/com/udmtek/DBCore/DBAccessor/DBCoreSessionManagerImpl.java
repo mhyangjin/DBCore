@@ -1,25 +1,21 @@
 package com.udmtek.DBCore.DBAccessor;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /** Implementation of the DBSessionManager
  * @author julu1 <julu1 @ naver.com >
  * @version version 0.1.0
  */
-@Component
-@Scope(value = "prototype" )
+
 public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	private String PersistenceUnit;
 	private EntityManagerFactory entityFactory=null;
@@ -29,23 +25,39 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	
 	@Autowired
 	ApplicationContext context;
+
+	public DBCoreSessionManagerImpl() {}
 	
-	@SuppressWarnings("unchecked")
+	@Autowired 
+	public DBCoreSessionManagerImpl(EntityManagerFactory entityFactory) 
+	{
+		this.entityFactory=entityFactory;
+	}
+
+	
 	@Override
 	public void startSessionManager(String argPersistUnit) {
-		PersistenceUnit=argPersistUnit;
-		entityFactory= Persistence.createEntityManagerFactory(PersistenceUnit);
-		DBCoreLogger.printInfo("SessionFactory:" + entityFactory.toString());
-		Map<String,Object> properties =entityFactory.getProperties();
-		MaxSessionPoolSize= Integer.parseInt(properties.get("hibernate.hikari.maximumPoolSize").toString());
+		PersistenceUnit=argPersistUnit; 
+		if (PersistenceUnit.equals("default")) {
+			DBCoreLogger.printInfo(PersistenceUnit);
+		}
+		else {
+			entityFactory= Persistence.createEntityManagerFactory(PersistenceUnit);
+
+		}
 		
+		Map<String,Object> properties =entityFactory.getProperties();
+//		DBCoreLogger.printInfo(properties.keySet().toString());
+		MaxSessionPoolSize= Integer.parseInt(properties.get("hibernate.hikari.maximumPoolSize").toString());
+		if (MaxSessionPoolSize == 0) MaxSessionPoolSize=1;
 		if (unusingSessions == null)
 		{
-			unusingSessions=( Set<DBCoreSession> )context.getBean("getList");
-			usingSessions=( Set<DBCoreSession> )context.getBean("getList");
+			unusingSessions=Collections.synchronizedSet(new HashSet<DBCoreSession>());
+			usingSessions=Collections.synchronizedSet(new HashSet<DBCoreSession>());
 		}
 		createEmptySessions();
 	}
+	
 	@Override
 	public String getPersistUnit() {
 		return PersistenceUnit;
@@ -151,7 +163,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	private void createEmptySessions() {
 		for ( int i=0; i < MaxSessionPoolSize; i++)
 		{
-			DBCoreSession newSession=context.getBean(DBCoreSession.class);
+			DBCoreSession newSession=new DBCoreSessionImpl();
 			String SessionName=PersistenceUnit +"Session"+ i;
 			newSession.readyConnect(entityFactory, SessionName);
 			unusingSessions.add(newSession);

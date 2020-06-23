@@ -1,11 +1,15 @@
 package com.udmtek.DBCore.DBAccessor;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,22 +18,18 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Aspect
-public class DefineAOP {
+public class TransactionAOP {
 	@Autowired
+	@Qualifier("DBAccessManager")
 	DBCoreAccessManager DBAccessor;
-	private static final Logger logger=LoggerFactory.getLogger(DefineAOP.class);
+	@Autowired
+	@Qualifier("DBManager")
+	DBCoreSessionManager myManager;
 	
-	public DefineAOP() {
-		// TODO Auto-generated constructor stub
-		
-	}
+	private static final Logger logger=LoggerFactory.getLogger(TransactionAOP.class);
 	
 	@Around("@annotation(DBCoreTransactional)&& @annotation(target)") 
 	public Object DBCoreTransactional(ProceedingJoinPoint joinpoint, DBCoreTransactional target) throws Throwable {
-		DBCoreSessionManager myManager;
-		String PersistenceUnitName=target.PersistUnit();
-		myManager=DBAccessor.makeSessionManager(PersistenceUnitName);
-		
 		DBCoreSession currSession=myManager.openSession(3, 100);
 		if ( currSession == null) {
 			
@@ -58,9 +58,6 @@ public class DefineAOP {
 
 	@Around("@annotation(DBCoreReadTransactional)&& @annotation(target)")
 	 public Object DBCoreReadTransactional(ProceedingJoinPoint joinpoint, DBCoreReadTransactional target) throws Throwable {
-		DBCoreSessionManager myManager;
-		String PersistenceUnitName=target.PersistUnit();
-		myManager=DBAccessor.makeSessionManager(PersistenceUnitName);
 		Object result=null;
 		
 		DBCoreSession currSession=myManager.openSession(3, 100);

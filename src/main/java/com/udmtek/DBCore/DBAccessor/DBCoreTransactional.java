@@ -16,6 +16,6 @@ public @interface DBCoreTransactional {
 	/**
 	 * PersisUnit : persistence-unit name.
 	 */
-	String PersistUnit();
+	String value() default "default";
 
 }
