@@ -13,10 +13,10 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
-import com.udmtek.DBCoreTest.model.FactoryDAO;
-import com.udmtek.DBCoreTest.model.FactoryImpl;
-import com.udmtek.DBCoreTest.model.FactoryInfo;
-import com.udmtek.DBCoreTest.model.FactoryInfoImpl;
+import com.udmtek.DBCore.model.DAO.FactoryDAO;
+import com.udmtek.DBCore.model.Impl.FactoryImpl;
+import com.udmtek.DBCore.model.Info.FactoryInfo;
+import com.udmtek.DBCore.model.InfoImpl.FactoryInfoImpl;
 
 /**
  * @author julu1 <julu1 @ naver.com >

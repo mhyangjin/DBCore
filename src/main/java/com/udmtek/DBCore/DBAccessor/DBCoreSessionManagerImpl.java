@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
@@ -18,7 +20,7 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	private String PersistenceUnit;
-	private EntityManagerFactory entityFactory=null;
+	private SessionFactory sessionFactory=null;
 	private int MaxSessionPoolSize;
 	private Set<DBCoreSession> unusingSessions=null;
 	private Set<DBCoreSession> usingSessions=null;
@@ -28,27 +30,23 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 
 	public DBCoreSessionManagerImpl() {}
 	
-	@Autowired 
-	public DBCoreSessionManagerImpl(EntityManagerFactory entityFactory) 
-	{
-		this.entityFactory=entityFactory;
+	public DBCoreSessionManagerImpl(String argPersistUnit) {
+		PersistenceUnit=argPersistUnit;
+		EntityManagerFactory entityFactory=Persistence.createEntityManagerFactory(PersistenceUnit);
+		sessionFactory= (SessionFactory)entityFactory;
+		Map<String,Object> properties =entityFactory.getProperties();
+		MaxSessionPoolSize= Integer.parseInt(properties.get("hibernate.hikari.maximumPoolSize").toString());
 	}
-
+	
+	public DBCoreSessionManagerImpl(SessionFactory sessionFactory, int MaxSessionPoolSize) 
+	{
+		this.sessionFactory=sessionFactory;
+		this.MaxSessionPoolSize= MaxSessionPoolSize;
+	}
 	
 	@Override
 	public void startSessionManager(String argPersistUnit) {
 		PersistenceUnit=argPersistUnit; 
-		if (PersistenceUnit.equals("default")) {
-			DBCoreLogger.printInfo(PersistenceUnit);
-		}
-		else {
-			entityFactory= Persistence.createEntityManagerFactory(PersistenceUnit);
-
-		}
-		
-		Map<String,Object> properties =entityFactory.getProperties();
-//		DBCoreLogger.printInfo(properties.keySet().toString());
-		MaxSessionPoolSize= Integer.parseInt(properties.get("hibernate.hikari.maximumPoolSize").toString());
 		if (MaxSessionPoolSize == 0) MaxSessionPoolSize=1;
 		if (unusingSessions == null)
 		{
@@ -63,8 +61,8 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		return PersistenceUnit;
 	}
 	@Override
-	public EntityManagerFactory getEntityFactory() {
-		return entityFactory;
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
 	}
 	@Override
 	public void printValues() {
@@ -77,7 +75,6 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	public DBCoreSession openSession() {
 		DBCoreSession currSession=null;
 		currSession=findUnusingSession();
-		
 		String msg="UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
 		DBCoreLogger.printInfo(msg);
 		DBSession.set(currSession);
@@ -127,7 +124,6 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	@Override
 	public boolean closeSession(DBCoreSession currSession) {
 		boolean result=currSession.closeSession();
-		
 		unusingSessions.add(currSession);
 		usingSessions.remove(currSession);
 		DBSession.remove();
@@ -165,7 +161,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		{
 			DBCoreSession newSession=new DBCoreSessionImpl();
 			String SessionName=PersistenceUnit +"Session"+ i;
-			newSession.readyConnect(entityFactory, SessionName);
+			newSession.readyConnect(sessionFactory, SessionName);
 			unusingSessions.add(newSession);
 		}
 	}
@@ -174,6 +170,6 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		//before delete map, have to call closeSession() all session in usigSessions.
 		usingSessions.clear();
 		unusingSessions.clear();
-		entityFactory.close();
+		sessionFactory.close();
 	}
 }

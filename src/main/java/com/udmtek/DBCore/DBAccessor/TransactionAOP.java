@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.udmtek.DBCore.ComUtil.DBCoreLogger;
+
 /**
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
@@ -20,19 +22,15 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class TransactionAOP {
 	@Autowired
-	@Qualifier("DBAccessManager")
-	DBCoreAccessManager DBAccessor;
-	@Autowired
 	@Qualifier("DBManager")
 	DBCoreSessionManager myManager;
-	
-	private static final Logger logger=LoggerFactory.getLogger(TransactionAOP.class);
-	
+		
 	@Around("@annotation(DBCoreTransactional)&& @annotation(target)") 
 	public Object DBCoreTransactional(ProceedingJoinPoint joinpoint, DBCoreTransactional target) throws Throwable {
 		DBCoreSession currSession=myManager.openSession(3, 100);
 		if ( currSession == null) {
-			
+			 DBCoreLogger.printDBError("There is no available session "+joinpoint.getSignature());
+			 return null;
 		}
 			
 		 Object result=null;
@@ -45,9 +43,9 @@ public class TransactionAOP {
 			 currSession.endTransaction(true);
 		 }
 		 catch (Exception e) {
+			 DBCoreLogger.printDBInfo("Exception throws in "+joinpoint.getSignature()+" "+ e.toString());
 			 if ( BeginOK )
 				 currSession.endTransaction(false);
-			 	logger.info("[DBCore] Exception throws in {} {}",joinpoint.getSignature(), e.toString());
 		 }
 		 finally {
 			 myManager.closeSession(currSession);
@@ -62,7 +60,8 @@ public class TransactionAOP {
 		
 		DBCoreSession currSession=myManager.openSession(3, 100);
 		if ( currSession == null) {
-			
+			 DBCoreLogger.printDBError("There is no available session "+joinpoint.getSignature());
+			 return null;
 		}
 		 boolean BeginOK=false;
 		try {
@@ -73,9 +72,9 @@ public class TransactionAOP {
 		 	 currSession.endTransaction(false);
 		 }
 		 catch (Exception e) {
-			 if ( BeginOK )
+			 DBCoreLogger.printDBInfo("Exception throws in "+joinpoint.getSignature()+" "+ e.toString());
+		 if ( BeginOK )
 				 currSession.endTransaction(false);
-			 logger.info("[DBCore] Exception throws in {} {}",joinpoint.getSignature(), e.toString());
 		 }
 		finally {
 			 myManager.closeSession(currSession);

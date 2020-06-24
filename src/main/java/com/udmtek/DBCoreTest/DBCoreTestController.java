@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-import com.udmtek.DBCoreTest.model.FactoryDAO;
-import com.udmtek.DBCoreTest.model.FactoryInfo;
+import com.udmtek.DBCore.model.DAO.FactoryDAO;
+import com.udmtek.DBCore.model.Info.FactoryInfo;
 
 
 /**

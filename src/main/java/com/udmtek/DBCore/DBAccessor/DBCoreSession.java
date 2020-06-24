@@ -1,13 +1,7 @@
 package com.udmtek.DBCore.DBAccessor;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
-import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
-
 
 /**
  * interface DBCoreSession
@@ -20,7 +14,7 @@ public interface DBCoreSession{
 	 * @param SessionFactory, String 
 	 * @return void
 	 */
-	public void readyConnect(EntityManagerFactory argFactory, String argSessionName);
+	public void readyConnect(SessionFactory sessionFactory, String argSessionName);
 	
 	/**
 	 * get Session and create an EntityManager
@@ -41,7 +35,7 @@ public interface DBCoreSession{
 	 */
 	public boolean beginTransaction(boolean ReadOnly);
 	
-	public EntityManager getThisSession();
+	public Session getThisSession();
 	/**
 	 * end the transaction
 	 * @param CommitOK (true:commit,false:rollback)
@@ -60,6 +54,7 @@ public interface DBCoreSession{
 	 * @param 
 	 * @return sessionFactory
 	 */
-	public EntityManagerFactory getEntityFactory();
+	public SessionFactory getSessionFactory();
 
+	public boolean isBeginTransaction();
 }

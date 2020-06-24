@@ -1,7 +1,9 @@
 package com.udmtek.DBCore.DBAccessor;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -20,20 +22,20 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	@Autowired
 	ApplicationContext context;
 	
-	private EntityManagerFactory myEntityFactory=null;
+	private SessionFactory sessionFactory=null;
 	private String SessionName="";
 	SessionStateEnum sessionState;	
 
-	private EntityManager thisSession=null;
-	private int EntityManagerSeq=0;
+	private Session thisSession=null;
+	private int SessionSeq=0;
 	
 	private int TransactionSeq=0;
 	private boolean ReadOnly;
 	
 	
 	@Override
-	public void readyConnect(EntityManagerFactory argFactory, String argSessionName) {
-		myEntityFactory=argFactory;
+	public void readyConnect(SessionFactory sessionFactory, String argSessionName) {
+		this.sessionFactory=sessionFactory;
 		SessionName=argSessionName;
 		sessionState=SessionStateEnum.INIT;
 	}
@@ -42,12 +44,13 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	public boolean openSession()
 	{
 		if ( !sessionState.isPossibleProcess("openSession"))
-			DBCoreLogger.printInfo("openSession" + sessionState.isPossibleProcess("openSession"));
-		thisSession=myEntityFactory.createEntityManager();
-		if (EntityManagerSeq >= 2147483647 ) {
-			EntityManagerSeq=1;
+			DBCoreLogger.printDBError("openSession" + sessionState.isPossibleProcess("openSession"));
+		
+		thisSession=sessionFactory.openSession();
+		if (SessionSeq >= 2147483647 ) {
+			SessionSeq=1;
 		}
-		EntityManagerSeq++;
+		SessionSeq++;
 		sessionState=SessionStateEnum.OPEN;
 		return true;
 	}
@@ -55,7 +58,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	@Override
 	public boolean closeSession() {
 		if ( !sessionState.isPossibleProcess("closeSession"))
-		DBCoreLogger.printInfo("closeSession" + sessionState.isPossibleProcess("closeSession"));
+		DBCoreLogger.printDBError("closeSession" + sessionState.isPossibleProcess("closeSession"));
 		
 		thisSession.close();
 		thisSession=null;
@@ -63,7 +66,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		return true;
 	}
 	
-	public EntityManager getThisSession() {
+	public Session getThisSession() {
 		return thisSession;
 	}
 	
@@ -72,16 +75,16 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		String TransactionID=SessionName;
 		switch (sessionState) {
 		case INIT:
-			TransactionID = TransactionID + ":";
+			TransactionID = TransactionID + "..";
 			break;
 		case OPEN:
-			TransactionID = TransactionID +"["+EntityManagerSeq +":]";
+			TransactionID = TransactionID +"."+SessionSeq +".";
 			break;
 		case BEGIN:
-			TransactionID = TransactionID +"["+EntityManagerSeq +":"+TransactionSeq + "]";
+			TransactionID = TransactionID +"."+SessionSeq +"."+TransactionSeq;
 			break;
 		case END:
-			TransactionID = TransactionID +"["+EntityManagerSeq +":]";
+			TransactionID = TransactionID +"."+SessionSeq +".";
 			break;
 		default:
 			break;
@@ -92,7 +95,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	@Override
 	public boolean beginTransaction(boolean ReadOnly) {
 		if ( !sessionState.isPossibleProcess("beginTransaction"))
-			DBCoreLogger.printInfo("beginTransaction" + sessionState.isPossibleProcess("beginTransaction"));
+			DBCoreLogger.printDBError("beginTransaction" + sessionState.isPossibleProcess("beginTransaction"));
 		
 		this.ReadOnly = ReadOnly;
 		thisSession.getTransaction().begin();
@@ -108,14 +111,13 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	@Override
 	public boolean endTransaction(boolean CommitOK) {
 		if ( !sessionState.isPossibleProcess("endTransaction"))
-			DBCoreLogger.printInfo("endTransaction" + sessionState.isPossibleProcess("endTransaction"));
+			DBCoreLogger.printDBError("endTransaction" + sessionState.isPossibleProcess("endTransaction"));
 		
 		boolean CommitResult=false;
 		
 		try {
 			if ( this.ReadOnly==false && CommitOK)
 			{
-				DBCoreLogger.printInfo("COMMIT");
 				thisSession.flush();
 				thisSession.getTransaction().commit();
 			}
@@ -131,8 +133,14 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	}
 	
 	@Override
-	public EntityManagerFactory getEntityFactory() {
-		return myEntityFactory;
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
+	}
+
+	@Override
+	public boolean isBeginTransaction() {
+		if (sessionState == SessionStateEnum.BEGIN) return true;
+		return false;
 	}
 
 }

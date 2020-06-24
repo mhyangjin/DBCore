@@ -1,8 +1,6 @@
 
 package com.udmtek.DBCore.DAOModel;
 
-import com.udmtek.DBCoreTest.model.FactoryDAO;
-import com.udmtek.DBCoreTest.model.FactoryInfo;
 
 /**
  * @author julu1 <julu1 @ naver.com >

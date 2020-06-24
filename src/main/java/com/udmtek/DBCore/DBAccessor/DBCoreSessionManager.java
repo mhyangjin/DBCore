@@ -2,6 +2,8 @@ package com.udmtek.DBCore.DBAccessor;
 
 import javax.persistence.EntityManagerFactory;
 
+import org.hibernate.SessionFactory;
+
 
 /**
  * management DBCoreSession set.
@@ -64,7 +66,7 @@ public interface DBCoreSessionManager{
 	 * @param
 	 * @return SessionFactory
 	 */
-	public EntityManagerFactory getEntityFactory();
+	public SessionFactory getSessionFactory();
 	
 	/**
 	 * close all sessions. can't use DBCoreSessionManager any more.

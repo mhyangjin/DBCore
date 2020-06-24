@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Property;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
@@ -101,11 +103,21 @@ public class DBCoreConfigClass {
 		return myaccessor;
 	}
 	
+	@Bean(name="sessionFactory")
+	@DependsOn({"getMap","DBCoreEntityManagerFactory","DBAccessManager" })
+	public SessionFactory sessionFactory(EntityManagerFactory emf) {
+	    HibernateJpaSessionFactoryBean fact = new HibernateJpaSessionFactoryBean();
+	    fact.setEntityManagerFactory(emf);
+	    return fact.getObject();
+	}
+	
 	@Bean(name="DBManager")
-	public DBCoreSessionManager getDBManager() {
-		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(DBCoreEntityManagerFactory());
+	@DependsOn({"sessionFactory" })
+	public DBCoreSessionManager getDBManager(SessionFactory sessionFactory) {
+		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");
 		return returnManager;
 	}
+
 }
 

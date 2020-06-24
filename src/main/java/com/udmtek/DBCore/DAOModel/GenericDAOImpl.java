@@ -15,7 +15,6 @@ import org.springframework.dao.DataAccessException;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
-import com.udmtek.DBCoreTest.model.FactoryInfo;
 
 
 /**
@@ -51,53 +50,47 @@ public class GenericDAOImpl <T extends Entity> implements GenericDAO<T> {
 	
 	@Override
 	public T get(Serializable key) {
-		
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 		Entity result;
 		if ( needConvert ) {
-			result=(Entity)currSession.find(convertType, key);
+			result=(Entity)currSession.get(convertType, key);
 			result=result.getInfo(type);
 		}
 		else
-			result = currSession.find(type, key);
+			result = currSession.get(type, key);
 
 		return (T)result;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<T> getfromJPQL(String Jquery) {
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		return convertType(currSession.createQuery(Jquery).getResultList());
+	public List<T> getfromJPQL(String Hquery) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return convertType(currSession.createQuery(Hquery).list());
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getfromSQL(String sqlquery) {
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		if ( needConvert )
-			return convertType(currSession.createNativeQuery(sqlquery,convertType).getResultList());
-		else 
-			return currSession.createQuery("select m from " + type.getName() + " m").getResultList();
-		
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return convertType(currSession.createSQLQuery(sqlquery).list());
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getAll() {
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 		if ( needConvert )
-			return convertType(currSession.createQuery("select m from " + convertType.getName() + " m").getResultList());
+			return convertType(currSession.createQuery("select m from " + convertType.getName() + " m").list());
 		else 
-			return currSession.createQuery("select m from " + type.getName() + " m").getResultList();
+			return currSession.createQuery("select m from " + type.getName() + " m").list();
 			
 	}
 
 	@Override
 	public void insert(T object) throws DataAccessException {
 		
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 		if ( needConvert )
 			currSession.persist(convertType.cast(object));
 		else
@@ -106,7 +99,7 @@ public class GenericDAOImpl <T extends Entity> implements GenericDAO<T> {
 
 	@Override
 	public void save(T object) {
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 		if ( needConvert )
 			currSession.merge(convertType.cast(object));
 		else
@@ -115,20 +108,20 @@ public class GenericDAOImpl <T extends Entity> implements GenericDAO<T> {
 
 	@Override
 	public void delete(T object) throws DataAccessException {
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 		if ( needConvert )
-			currSession.remove(convertType.cast(object));
+			currSession.delete(convertType.cast(object));
 		else
-			currSession.remove(object);
+			currSession.delete(object);
 	}
 	
 	@Override
 	public void delete(Serializable object) throws DataAccessException {
-		EntityManager currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 		if ( needConvert )
-			currSession.remove( convertType.cast(get(object)));
+			currSession.delete( convertType.cast(get(object)));
 		else
-			currSession.remove(get(object));
+			currSession.delete(get(object));
 	}
 	
 }

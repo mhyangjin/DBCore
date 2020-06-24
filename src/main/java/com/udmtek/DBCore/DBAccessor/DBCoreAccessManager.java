@@ -33,7 +33,7 @@ public class DBCoreAccessManager  {
 		{
 			return returnManager;
 		}
-		returnManager= new DBCoreSessionManagerImpl();
+		returnManager= new DBCoreSessionManagerImpl(PersistenceUnit);
 		returnManager.startSessionManager(PersistenceUnit);
 		PersistenceMap.put(PersistenceUnit, returnManager);
 		return returnManager;

@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreReadTransactional;
 import com.udmtek.DBCore.DBAccessor.DBCoreTransactional;
-import com.udmtek.DBCoreTest.model.FactoryDAO;
-import com.udmtek.DBCoreTest.model.FactoryImpl;
-import com.udmtek.DBCoreTest.model.PersonDAO;
-import com.udmtek.DBCoreTest.model.PersonInfo;
-import com.udmtek.DBCoreTest.model.PersonInfoImpl;
+import com.udmtek.DBCore.model.DAO.FactoryDAO;
+import com.udmtek.DBCore.model.DAO.PersonDAO;
+import com.udmtek.DBCore.model.Impl.FactoryImpl;
+import com.udmtek.DBCore.model.Info.PersonInfo;
+import com.udmtek.DBCore.model.InfoImpl.PersonInfoImpl;
 
 /**
  * @author julu1 <julu1 @ naver.com >
