@@ -27,15 +27,15 @@ import com.zaxxer.hikari.HikariDataSource;
  * @version 0.1.0
  */
 @Configuration
-@Profile("!dev")
-public class DBCoreConfigClass {
-	@Value("${spring.datasource.mes.driverClassName}") 
+@Profile("dev")
+public class DBCoreDevConfigClass {
+	@Value("${hibernate.connection.driver_class}") 
 	String driverClassName;
-	@Value("${spring.datasource.mes.username}")
+	@Value("${hibernate.connection.username}")
 	String userName;
-	@Value("${spring.datasource.mes.password}") 
+	@Value("${hibernate.connection.password}") 
 	String passWord;
-	@Value("${spring.datasource.mes.url}") 
+	@Value("${hibernate.connection.url}") 
 	String jdbcUrl;
 	
 	@Value("${hibernate.hikari.maximumPoolSize}") 
@@ -118,5 +118,5 @@ public class DBCoreConfigClass {
 		returnManager.startSessionManager("default");
 		return returnManager;
 	}
-}
 
+}

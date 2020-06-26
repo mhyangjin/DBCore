@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
+import com.udmtek.DBCore.DBAccessor.DBCoreCommService;
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 import com.udmtek.DBCore.model.DAO.FactoryDAO;
@@ -31,6 +32,9 @@ public class DBCoreTestClass {
 
 	@Autowired
 	ApplicationContext context;
+	
+	@Autowired
+	DBCoreCommService DBCommService;
 	
 	public DBCoreTestClass() {
 	}
