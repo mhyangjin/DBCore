@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-import com.udmtek.DBCore.model.DAO.FactoryDAO;
-import com.udmtek.DBCore.model.Info.FactoryInfo;
-
+import com.udmtek.DBCore.model.factory.Factory;
+import com.udmtek.DBCore.model.factory.FactoryDTO;
 
 /**
  * @author julu1 <julu1 @ naver.com >
@@ -97,7 +96,7 @@ public class DBCoreTestController {
 		
 		if ( sourceType.equals("DAOImpl")) {	
 			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-			FactoryDAO factory=(FactoryDAO) Mystart.readFactoryWithKey(memberCorpid,factoryid);
+			FactoryDTO factory=(FactoryDTO) Mystart.readFactoryWithKey(memberCorpid,factoryid);
 			mv.addObject("FactoryId",factory );
 		}
 		if ( sourceType.equals("Annotation")) {
@@ -110,7 +109,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/updateDataWithKey")
 	@ResponseBody
-	public String updateDataWithKey( FactoryInfo myfactory,
+	public String updateDataWithKey( FactoryDTO myfactory,
 			@RequestParam("sourceType") String sourceType) {
 		String Result=null;
 		
@@ -147,7 +146,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/insertFactory")
 	@ResponseBody
-	public String insertFactory( FactoryInfo myfactory) {
+	public String insertFactory( FactoryDTO myfactory) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 		return Mystart.insertFactory(myfactory);
 	}

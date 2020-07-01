@@ -66,6 +66,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		return true;
 	}
 	
+	@Override
 	public Session getThisSession() {
 		return thisSession;
 	}
@@ -126,7 +127,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 			CommitResult=true;
 			sessionState=SessionStateEnum.OPEN;
 		} catch (Exception e)	 {
-			e.printStackTrace();
+			DBCoreLogger.printDBError(e.toString());
 			throw (e);
 		}
 		return CommitResult;

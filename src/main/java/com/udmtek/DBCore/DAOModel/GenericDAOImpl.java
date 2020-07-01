@@ -2,18 +2,11 @@ package com.udmtek.DBCore.DAOModel;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-
+import java.util.Map;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
-
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 
 
@@ -22,106 +15,89 @@ import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
  * @version 0.1.0
  */
 
-public class GenericDAOImpl <T extends Entity> implements GenericDAO<T> {
-	private Class<T> type;
-	private boolean needConvert=false;
-	private Class<?> convertType;
+public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extends DBCoreDTOMapper<E,D>>
+			implements GenericDAO<E,D,M> {
+	private Class<E> entityType;
+	private Class<D> dtoType;
+	private M mapperObject;
+	
 	@Autowired
 	ApplicationContext context;
 	
-	public GenericDAOImpl(Class<T> type) {
+	
+	public GenericDAOImpl(Class<E> entityType, Class<D> dtoType) {
 		super();
-		this.type = type;
-		if ( type.getSimpleName().endsWith("Info")) {
-			needConvert=true;
-			convertType=type.getSuperclass();
-		}
+		this.entityType = entityType;
+		this.dtoType = dtoType;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<T> convertType(List<Object> object) {
-		if (object == null) return null;
-			List<T> result=object
-					.stream()
-					.map(e -> (T) e)
-					.collect(Collectors.toList());
-			return result;
+	@Autowired
+	public void setMapperObject(M mapperObject) {
+		this.mapperObject = mapperObject;
 	}
 	
 	@Override
-	public T get(Serializable key) {
+	public D get(Serializable key) {
 		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		Entity result;
-		if ( needConvert ) {
-			result=(Entity)currSession.get(convertType, key);
-			result=result.getInfo(type);
-		}
-		else
-			result = currSession.get(type, key);
-
-		return (T)result;
+		DBCoreEntity result;
+		result = currSession.get(entityType, key);
+		return (D) mapperObject.toDto((E)result);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<T> getfromJPQL(String Hquery) {
+	public List<D> getfromJPQL(String Hquery) {
 		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		return convertType(currSession.createQuery(Hquery).list());
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<T> getfromSQL(String sqlquery) {
-		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		return convertType(currSession.createSQLQuery(sqlquery).list());
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<T> getAll() {
-		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		if ( needConvert )
-			return convertType(currSession.createQuery("select m from " + convertType.getName() + " m").list());
-		else 
-			return currSession.createQuery("select m from " + type.getName() + " m").list();
-			
-	}
-
-	@Override
-	public void insert(T object) throws DataAccessException {
+		List<E> entities=currSession.createQuery(Hquery).list();
 		
+		return (List<D>) mapperObject.toDto(entities);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getfromSQL(String sqlquery) {
 		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		if ( needConvert )
-			currSession.persist(convertType.cast(object));
-		else
-			currSession.persist(object);
+		List<Map<String, Object>> entities= currSession.createSQLQuery(sqlquery).addEntity(entityType).list();
+		return (List<D>) mapperObject.toDto((List<E>)entities);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getAll() {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		List<E> entities=  currSession.createQuery("select m from " + entityType.getName() + " m").list();
+		return (List<D>) mapperObject.toDto(entities);		
 	}
 
 	@Override
-	public void save(T object) {
+	public void insert(D object) throws DataAccessException {
+		E entity=(E) mapperObject.toEntity(object);
 		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		if ( needConvert )
-			currSession.merge(convertType.cast(object));
-		else
-			currSession.merge(object);
+		currSession.persist(entity);
 	}
 
 	@Override
-	public void delete(T object) throws DataAccessException {
+	public void save(D object) {
 		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		if ( needConvert )
-			currSession.delete(convertType.cast(object));
-		else
-			currSession.delete(object);
+		E entity=(E) mapperObject.toEntity(object);
+		currSession.merge(entity);
+	}
+
+	@Override
+	public void delete(D object) throws DataAccessException {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		E entity=(E) mapperObject.toEntity(object);
+		currSession.delete(entity);
 	}
 	
 	@Override
 	public void delete(Serializable object) throws DataAccessException {
 		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
-		if ( needConvert )
-			currSession.delete( convertType.cast(get(object)));
-		else
-			currSession.delete(get(object));
+		currSession.delete(getEntity(object));
 	}
 	
+	private E getEntity(Serializable key) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return (E)currSession.get(entityType, key);
+	}
 }

@@ -26,8 +26,13 @@ public class LogAOP {
 	 * @param
 	 * @return void
 	 */
-	@Before("execution(public * com.udmtek.DBCore.*..*.*(..))")
+	@Before("execution(public * com.udmtek.*.*..*.*(..))")
 	public void logBefore(JoinPoint joinpoint) {
-		logger.info("[DBCore] The {} begins",joinpoint.getSignature()); 
+		logger.trace("[DBCore] The {} begins",joinpoint.getSignature()); 
+	}
+	
+	@Before("execution(public * kr.co.udmtek.*.*..*.*(..))")
+	public void krlogBefore(JoinPoint joinpoint) {
+		logger.trace("[DBCore] The {} begins",joinpoint.getSignature()); 
 	}
 }

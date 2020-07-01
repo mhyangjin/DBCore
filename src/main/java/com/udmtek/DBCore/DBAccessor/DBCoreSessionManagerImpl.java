@@ -76,7 +76,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		DBCoreSession currSession=null;
 		currSession=findUnusingSession();
 		String msg="UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
-		DBCoreLogger.printInfo(msg);
+		DBCoreLogger.printTrace(msg);
 		DBSession.set(currSession);
 		return currSession;
 	}
@@ -112,7 +112,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		}
 		
 		String msg="[OPEN]UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
-		DBCoreLogger.printInfo(msg);
+		DBCoreLogger.printTrace(msg);
 		
 		if ( currSession != null)
 			//set Thread Local variable
@@ -128,7 +128,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		usingSessions.remove(currSession);
 		DBSession.remove();
 		String msg="[CLOSE]UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
-		DBCoreLogger.printInfo(msg);
+		DBCoreLogger.printTrace(msg);
 		return result;
 	}
 	
@@ -160,7 +160,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		for ( int i=0; i < MaxSessionPoolSize; i++)
 		{
 			DBCoreSession newSession=new DBCoreSessionImpl();
-			String SessionName=PersistenceUnit +"Session"+ i;
+			String SessionName=PersistenceUnit + i;
 			newSession.readyConnect(sessionFactory, SessionName);
 			unusingSessions.add(newSession);
 		}

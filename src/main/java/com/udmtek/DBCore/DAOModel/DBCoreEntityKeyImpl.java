@@ -8,14 +8,14 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
   */
-public class EntityKeyImpl implements EntityKey {
+public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -2403101385254750155L;
 	private Class<?> type;
 	
-	public EntityKeyImpl(Class<?> type) {
+	public DBCoreEntityKeyImpl(Class<?> type) {
 		this.type = type;
 	}
 

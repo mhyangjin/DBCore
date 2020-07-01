@@ -8,11 +8,14 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Property;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -27,6 +30,10 @@ import com.zaxxer.hikari.HikariDataSource;
  * @version 0.1.0
  */
 @Configuration
+@EnableJpaRepositories(
+        basePackages={"com.udmtek.DBCore"},
+        entityManagerFactoryRef = "DBCoreEntityManagerFactory",
+        transactionManagerRef = "DBCoreTransacionManager")
 @Profile("dev")
 public class DBCoreDevConfigClass {
 	@Value("${hibernate.connection.driver_class}") 
@@ -111,12 +118,19 @@ public class DBCoreDevConfigClass {
 	    return fact.getObject();
 	}
 	
+	@Bean(name="DBCoreTransacionManager")
+	public JpaTransactionManager DBCoretransactionManager(
+			@Qualifier("DBCoreEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+			JpaTransactionManager transactionManager= new JpaTransactionManager();
+			transactionManager.setEntityManagerFactory(entityManagerFactory);
+			return transactionManager;
+	}
+	
 	@Bean(name="DBManager")
 	@DependsOn({"sessionFactory" })
 	public DBCoreSessionManager getDBManager(SessionFactory sessionFactory) {
 		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");
 		return returnManager;
-	}
-
+	}	
 }
