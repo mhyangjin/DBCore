@@ -13,7 +13,8 @@ public enum SessionStateEnum {
 	private String SessionState;
 	private List<String> methods;
 	
-	SessionStateEnum(String string, List<String> methods) {
+	SessionStateEnum(String SessionState, List<String> methods) {
+		this.SessionState = SessionState;
 		this.methods = methods;
 	}
 	

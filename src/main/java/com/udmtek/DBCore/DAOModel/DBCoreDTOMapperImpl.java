@@ -50,6 +50,11 @@ public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> im
 			
 			for ( Field field : fields ) {
 				String fieldName=field.getName();
+				try {
+					entityType.getDeclaredField(fieldName);
+				}
+				catch (NoSuchFieldException e) {continue;}
+				
 				String getterName = "get" + fieldName.toUpperCase().charAt(0) + fieldName.substring(1);
 				String setterName = "set" + fieldName.toUpperCase().charAt(0) + fieldName.substring(1);
 				Object getObject=entityType.getMethod(getterName).invoke(entity);

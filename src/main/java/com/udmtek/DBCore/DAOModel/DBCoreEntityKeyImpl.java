@@ -21,7 +21,6 @@ public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
 
 	@Override
 	public String[] getKeyColumns() {
-		
 		Field[] columns = type.getDeclaredFields();
 		String[] columnNames=new String[columns.length];
 		for ( int i=0; i < columns.length; i++) {
@@ -39,7 +38,6 @@ public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
 			String getMethodName="get" + ColumnName.toUpperCase().charAt(0) + ColumnName.substring(1);
 			try {
 				String Res=(String) type.getMethod(getMethodName).invoke(this);
-				DBCoreLogger.printInfo("isValid:" + ColumnName + ":" + Res);
 				if ( Res.length() <0 )
 					vaild=false;
 			} catch (Exception e) {
@@ -57,8 +55,6 @@ public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
 		if ( this == o ) return true;
 		if ( o == null ) return false;
 		if ( o.getClass() != this.getClass() ) return false;
-//		FactoryIdDAO oFactoryID=(FactoryIdDAO) o;
-//		return  memberCorpid.equals(oFactoryID.memberCorpid) &&	factoryid.equals(oFactoryID.factoryid);
 		return true;
 	}
 	

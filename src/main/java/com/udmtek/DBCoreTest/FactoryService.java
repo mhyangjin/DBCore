@@ -53,7 +53,7 @@ public class FactoryService{
 	public String updateFactoryWithKey (FactoryDTO myfactory) {
 			//--- << update 부분 시작 >> ---
 		FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
-		factoryDao.save( myfactory);					//이상없으면 저장
+		factoryDao.update( myfactory);					//이상없으면 저장
 		// -- <<  update 부분 끝  >> ---
 		String result="Update OK";
 		return result;
