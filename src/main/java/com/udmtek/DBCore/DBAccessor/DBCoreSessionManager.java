@@ -16,8 +16,6 @@ public interface DBCoreSessionManager{
 	 * It will be can get DBCoreSession in current thread.
 	 */
 	public static ThreadLocal<DBCoreSession> DBSession=new ThreadLocal<DBCoreSession>();	
-<<<<<<< HEAD
-=======
 	/**
 	 * get opended session in current thread.
 	 * @param
@@ -25,7 +23,6 @@ public interface DBCoreSessionManager{
 	 */
 	public static DBCoreSession getCurrentSession() { return DBSession.get();} 
 
->>>>>>> udmtek
 	/**
 	 * make connection with specified Database
 	 * @param String  : persistence-unit name in peristence.xml
@@ -56,13 +53,6 @@ public interface DBCoreSessionManager{
 	 * @return DBCoreSession
 	 */	
 	public DBCoreSession openSession(int retryNo, long waitTime);
-	
-	/**
-	 * get opended session in current thread.
-	 * @param
-	 * @return DBCoreSession
-	 */
-	public DBCoreSession getCurrentSession();
 	
 	/**
 	 * close session.

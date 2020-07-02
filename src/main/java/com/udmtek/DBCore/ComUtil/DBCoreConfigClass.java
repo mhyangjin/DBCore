@@ -51,8 +51,6 @@ public class DBCoreConfigClass {
 	String minPoolSize;
 	@Value("${hibernate.dialect}") 
 	String dialect;
-	@Value("${hibernate.allow_update_outside_transaction}")
-	String outSideTransaction;
 	/**
 	 * make bean object of Map<String,DBCoreSessionManager> 
 	 * @return Map<String,DBCoreSessionManager>
@@ -61,19 +59,9 @@ public class DBCoreConfigClass {
 	public Map<String,DBCoreSessionManager> getMap() {
 		return Collections.synchronizedMap(new HashMap<String,DBCoreSessionManager>());
 	}
-	
-<<<<<<< HEAD
-	/**
-	 * make bean object of Set<DBCoreSession>
-	 * @return Set<DBCoreSession>
-	 */
-	@Bean(name="getList")
-	@Scope(value="prototype")
-	public Set<DBCoreSession> getList() {
-		return Collections.synchronizedSet(new HashSet<DBCoreSession>());
-=======
-	@Bean(destroyMethod = "shutdown")
-	public DataSource DBCoreDefaultDataSource() {
+
+	@Bean
+	public DataSource defaultDataSource() {
 			
 		HikariDataSource dataSource = new HikariDataSource();
 		dataSource.setDriverClassName(driverClassName);
@@ -85,9 +73,9 @@ public class DBCoreConfigClass {
 		return dataSource;
 	}
 	
-	@Bean(name = "DBCoreEntityManagerFactory")
-	public EntityManagerFactory DBCoreEntityManagerFactory() {
-		DBCoreLogger.printTrace("DBCORE:" + driverClassName 
+	@Bean(name = "DBCoreSessionFactory")
+	public SessionFactory DBCoreSessionFactory() {
+		DBCoreLogger.printInfo("DBCORE:" + driverClassName 
 	               + ":" + userName
 	               + ":" + passWord
 	               + ":" + jdbcUrl
@@ -98,41 +86,30 @@ public class DBCoreConfigClass {
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		vendorAdapter.setShowSql(true);
         factoryBean.setJpaVendorAdapter(vendorAdapter);
-        factoryBean.setDataSource(DBCoreDefaultDataSource());
-        factoryBean.setPackagesToScan("com.udmtek.DBCore.model.*");
+        factoryBean.setDataSource(defaultDataSource());
+        factoryBean.setPackagesToScan("com.udmtek.*");
         Properties hikariproperties = new Properties();
         hikariproperties.put("hibernate.hikari.maximumPoolSize",maxPoolSize);
         factoryBean.setJpaProperties(hikariproperties);
         Map<String, Property> jpaProperties=new HashMap<>();
         jpaProperties.put("hibernate.dialect", Property.forName(dialect));
-        jpaProperties.put("hibernate.allow_update_outside_transaction",	Property.forName(outSideTransaction));
-	    
        factoryBean.setJpaPropertyMap(jpaProperties);
 	   factoryBean.afterPropertiesSet();
        
-       return factoryBean.getNativeEntityManagerFactory();
+       return(SessionFactory) factoryBean.getNativeEntityManagerFactory();
 	}
 	
 	@Bean(name="DBAccessManager")
-	@DependsOn({"getMap","DBCoreEntityManagerFactory"})
+	@DependsOn({"getMap","DBCoreSessionFactory"})
 	public DBCoreAccessManager getdbCoreAccessManager() {
 		DBCoreAccessManager myaccessor=new DBCoreAccessManager();
 		return myaccessor;
 	}
 	
-	@Bean(name="DBCoreSessionFactory")
-	@DependsOn({"getMap","DBCoreEntityManagerFactory","DBAccessManager" })
-	public SessionFactory DBCoreSessionFactory(
-			@Qualifier("DBCoreEntityManagerFactory") EntityManagerFactory emf) {
-	    HibernateJpaSessionFactoryBean fact = new HibernateJpaSessionFactoryBean();
-	    fact.setEntityManagerFactory(emf);
-	    return fact.getObject();
-	}
-
 	
 	@Bean(name="DBCoreTransacionManager")
 	public JpaTransactionManager DBCoretransactionManager(
-			@Qualifier("DBCoreEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+			@Qualifier("DBCoreSessionFactory") EntityManagerFactory entityManagerFactory) {
 			JpaTransactionManager transactionManager= new JpaTransactionManager();
 			transactionManager.setEntityManagerFactory(entityManagerFactory);
 			return transactionManager;
@@ -140,18 +117,10 @@ public class DBCoreConfigClass {
 	
 	@Bean(name="DBManager")
 	@DependsOn({"DBCoreSessionFactory" })
-	public DBCoreSessionManager getDBManager(
-			@Qualifier("DBCoreSessionFactory") SessionFactory sessionFactory) {
+	public DBCoreSessionManager getDBManager(SessionFactory sessionFactory) {
 		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");
 		return returnManager;
->>>>>>> udmtek
-	}
-	
-	@Bean(name="getUseSessionMap")
-	@Scope(value="prototype")
-	public Map<Thread, DBCoreSession> getUseSessionMap() {
-		return Collections.synchronizedMap(new HashMap<Thread, DBCoreSession>());
 	}
 }
 

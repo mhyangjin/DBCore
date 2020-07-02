@@ -19,29 +19,6 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 @Component("DBCoreSession")
 @Scope(value = "prototype")
 public class DBCoreSessionImpl implements DBCoreSession {
-<<<<<<< HEAD
-	public enum State { 
-		INIT,
-		OPENDED,
-		BEGINED ,
-		End;
-		}
-  
-	@Autowired
-	ApplicationContext context;
-	
-	SessionState sessionControl;
-	
-	private SessionFactory mySessionFactory=null;
-	private String SessionName="";
-	State sessionState;
-
-	private EntityManager myentityManager=null;
-	private Session thisSession=null;
-	private int EntityManagerSeq=0;
-	
-	private Transaction currTransaction=null;
-=======
 	@Autowired
 	ApplicationContext context;
 	
@@ -52,7 +29,6 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	private Session thisSession=null;
 	private int SessionSeq=0;
 	
->>>>>>> udmtek
 	private int TransactionSeq=0;
 	private boolean ReadOnly;
 	
@@ -61,25 +37,12 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	public void readyConnect(SessionFactory sessionFactory, String argSessionName) {
 		this.sessionFactory=sessionFactory;
 		SessionName=argSessionName;
-<<<<<<< HEAD
-		sessionState=State.INIT;
-=======
 		sessionState=SessionStateEnum.INIT;
->>>>>>> udmtek
 	}
 	
 	@Override
 	public boolean openSession()
 	{
-<<<<<<< HEAD
-		thisSession=mySessionFactory.openSession();
-		myentityManager=mySessionFactory.createEntityManager();
-		if (EntityManagerSeq >= 2147483647 ) {
-			EntityManagerSeq=1;
-		}
-		EntityManagerSeq++;
-		sessionState=State.OPENDED;
-=======
 		if ( !sessionState.isPossibleProcess("openSession"))
 			DBCoreLogger.printDBError("openSession" + sessionState.isPossibleProcess("openSession"));
 		
@@ -89,7 +52,6 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		}
 		SessionSeq++;
 		sessionState=SessionStateEnum.OPEN;
->>>>>>> udmtek
 		return true;
 	}
 	
@@ -100,13 +62,6 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		
 		thisSession.close();
 		thisSession=null;
-<<<<<<< HEAD
-		myentityManager=null;
-		sessionState=State.INIT;
-		return true;
-	}
-	
-=======
 		sessionState=SessionStateEnum.INIT;
 		return true;
 	}
@@ -115,22 +70,12 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	public Session getThisSession() {
 		return thisSession;
 	}
->>>>>>> udmtek
 	
 	@Override
 	public String getTransactionID() {
 		String TransactionID=SessionName;
 		switch (sessionState) {
 		case INIT:
-<<<<<<< HEAD
-			TransactionID = TransactionID + ":";
-			break;
-		case OPENDED:
-			TransactionID = TransactionID +"["+EntityManagerSeq +":]";
-			break;
-		case BEGINED:
-			TransactionID = TransactionID +"["+EntityManagerSeq +":"+TransactionSeq + "]";
-=======
 			TransactionID = TransactionID + "..";
 			break;
 		case OPEN:
@@ -142,7 +87,6 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		case END:
 			TransactionID = TransactionID +"."+SessionSeq +".";
 			break;
->>>>>>> udmtek
 		default:
 			break;
 		}
@@ -155,22 +99,13 @@ public class DBCoreSessionImpl implements DBCoreSession {
 			DBCoreLogger.printDBError("beginTransaction" + sessionState.isPossibleProcess("beginTransaction"));
 		
 		this.ReadOnly = ReadOnly;
-<<<<<<< HEAD
-		currTransaction=thisSession.getTransaction();
-		currTransaction.begin();
-=======
 		thisSession.getTransaction().begin();
->>>>>>> udmtek
 		
 		if (TransactionSeq >= 2147483647 ) {
 			TransactionSeq=1;
 		}
 		TransactionSeq++;
-<<<<<<< HEAD
-		sessionState=State.BEGINED;
-=======
 		sessionState=SessionStateEnum.BEGIN;
->>>>>>> udmtek
 		return true;
 	}
 
@@ -195,12 +130,6 @@ public class DBCoreSessionImpl implements DBCoreSession {
 			DBCoreLogger.printDBError(e.toString());
 			throw (e);
 		}
-<<<<<<< HEAD
-		
-		currTransaction=null;
-		sessionState=State.INIT;
-=======
->>>>>>> udmtek
 		return CommitResult;
 	}
 	
@@ -213,28 +142,6 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	public boolean isBeginTransaction() {
 		if (sessionState == SessionStateEnum.BEGIN) return true;
 		return false;
-	}
-	
-	@Override
-	public State getSessionState()
-	{
-		return sessionState;
-	}
-	
-	
-	@Override
-	public boolean isOpened() {
-		if ( sessionState ==State.INIT )
-			return false;
-		else
-			return true;
-	}
-	@Override
-	public boolean isbeginedTransacion() {
-		if ( sessionState ==State.BEGINED )
-			return true;
-		else
-			return false;
 	}
 
 }

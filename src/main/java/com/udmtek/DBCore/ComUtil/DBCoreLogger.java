@@ -12,14 +12,11 @@ import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
  * @version 0.1.0
  */
 public class DBCoreLogger {
-<<<<<<< HEAD
-	private static Logger logger=LoggerFactory.getLogger("DBCoreLogger");
-=======
+
 	private static Logger logger=LoggerFactory.getLogger(DBCoreLogger.class);
 	public static void printTrace(String msg) {
 		logger.trace(msg);
 	}
->>>>>>> udmtek
 	
 	public static void printDebug(String msg) {
 		logger.debug(msg);

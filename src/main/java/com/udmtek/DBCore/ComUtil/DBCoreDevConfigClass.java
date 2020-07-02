@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
@@ -32,7 +31,7 @@ import com.zaxxer.hikari.HikariDataSource;
 @Configuration
 @EnableJpaRepositories(
         basePackages={"com.udmtek.DBCore"},
-        entityManagerFactoryRef = "DBCoreEntityManagerFactory",
+        entityManagerFactoryRef = "DBCoreSessionFactory",
         transactionManagerRef = "DBCoreTransacionManager")
 @Profile("dev")
 public class DBCoreDevConfigClass {
@@ -51,8 +50,6 @@ public class DBCoreDevConfigClass {
 	String minPoolSize;
 	@Value("${hibernate.dialect}") 
 	String dialect;
-	@Value("${hibernate.allow_update_outside_transaction}")
-	String outSideTransaction;
 	/**
 	 * make bean object of Map<String,DBCoreSessionManager> 
 	 * @return Map<String,DBCoreSessionManager>
@@ -62,7 +59,7 @@ public class DBCoreDevConfigClass {
 		return Collections.synchronizedMap(new HashMap<String,DBCoreSessionManager>());
 	}
 	
-	@Bean(destroyMethod = "shutdown")
+	@Bean
 	public DataSource defaultDataSource() {
 			
 		HikariDataSource dataSource = new HikariDataSource();
@@ -75,8 +72,8 @@ public class DBCoreDevConfigClass {
 		return dataSource;
 	}
 	
-	@Bean(name = "DBCoreEntityManagerFactory")
-	public EntityManagerFactory DBCoreEntityManagerFactory() {
+	@Bean(name = "DBCoreSessionFactory")
+	public SessionFactory DBCoreSessionFactory() {
 		DBCoreLogger.printInfo("DBCORE:" + driverClassName 
 	               + ":" + userName
 	               + ":" + passWord
@@ -95,39 +92,30 @@ public class DBCoreDevConfigClass {
         factoryBean.setJpaProperties(hikariproperties);
         Map<String, Property> jpaProperties=new HashMap<>();
         jpaProperties.put("hibernate.dialect", Property.forName(dialect));
-        jpaProperties.put("hibernate.allow_update_outside_transaction",	Property.forName(outSideTransaction));
-	    
        factoryBean.setJpaPropertyMap(jpaProperties);
 	   factoryBean.afterPropertiesSet();
        
-       return factoryBean.getNativeEntityManagerFactory();
+       return(SessionFactory) factoryBean.getNativeEntityManagerFactory();
 	}
 	
 	@Bean(name="DBAccessManager")
-	@DependsOn({"getMap","DBCoreEntityManagerFactory"})
+	@DependsOn({"getMap","DBCoreSessionFactory"})
 	public DBCoreAccessManager getdbCoreAccessManager() {
 		DBCoreAccessManager myaccessor=new DBCoreAccessManager();
 		return myaccessor;
 	}
 	
-	@Bean(name="sessionFactory")
-	@DependsOn({"getMap","DBCoreEntityManagerFactory","DBAccessManager" })
-	public SessionFactory sessionFactory(EntityManagerFactory emf) {
-	    HibernateJpaSessionFactoryBean fact = new HibernateJpaSessionFactoryBean();
-	    fact.setEntityManagerFactory(emf);
-	    return fact.getObject();
-	}
 	
 	@Bean(name="DBCoreTransacionManager")
 	public JpaTransactionManager DBCoretransactionManager(
-			@Qualifier("DBCoreEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+			@Qualifier("DBCoreSessionFactory") EntityManagerFactory entityManagerFactory) {
 			JpaTransactionManager transactionManager= new JpaTransactionManager();
 			transactionManager.setEntityManagerFactory(entityManagerFactory);
 			return transactionManager;
 	}
 	
 	@Bean(name="DBManager")
-	@DependsOn({"sessionFactory" })
+	@DependsOn({"DBCoreSessionFactory" })
 	public DBCoreSessionManager getDBManager(SessionFactory sessionFactory) {
 		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");

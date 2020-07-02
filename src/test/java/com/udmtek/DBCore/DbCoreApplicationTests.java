@@ -1,12 +1,12 @@
 package com.udmtek.DBCore;
 
-import org.junit.Test;
+import org.junit.platform.commons.annotation.Testable;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class DbCoreApplicationTests {
 
-	@Test
+	@Testable
 	void contextLoads() {
 	}
 

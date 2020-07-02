@@ -76,13 +76,9 @@ public class DBCoreTestClass {
 
 	
 	//FactoryDAO 를 이용한 all select 기능
-<<<<<<< HEAD:src/main/java/com/udmtek/DBCore/TestModule/DBCoreTestClass.java
-	public List<Factory> readFactory() {
-=======
 	public List<FactoryDTO> readFactory() {
 		
 		FactoryMapper factoryMapper = context.getBean(FactoryMapper.class);
->>>>>>> udmtek:src/main/java/com/udmtek/DBCoreTest/DBCoreTestClass.java
 		
 		DBCoreSession currSession=myManager.openSession(3,1000);
 		if (currSession == null )
@@ -96,6 +92,7 @@ public class DBCoreTestClass {
 			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
 			Factories = factoryDao.getAll();
 			// -- <<  조회부분 끝  >> ---
+			
 			currSession.endTransaction(false);
 		}
 		catch ( Exception e) {
@@ -106,30 +103,6 @@ public class DBCoreTestClass {
 		}
 		finally {
 			myManager.closeSession(currSession);
-<<<<<<< HEAD:src/main/java/com/udmtek/DBCore/TestModule/DBCoreTestClass.java
-		}
-		return Factories;
-	}
-	
-	//FactoryDAO의 primary key를 이용한 1건 조회 기능
-	public Factory readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
-		DBCoreSession currSession=myManager.openSession(3,1000);
-		if (currSession == null )
-			return null;
-		Factory findFactory=null;
-		boolean BeginOK=false;
-		try {
-			BeginOK=currSession.beginTransaction(true);
-			DBCoreLogger.printInfo("memberCorpID:" + argmemberCorpId + " factoryId:" + argfactoryId);
-			//--- << 조회 부분 시작 >> ---
-			FactoryDAOImpl factoryImpl=(FactoryDAOImpl)currSession.getDAOImpl("Factory"); //Table Name으로 생성
-			FactoryId factoryKey=new FactoryId(argmemberCorpId,argfactoryId );		//key entity 생성
-			findFactory=(Factory)factoryImpl.get((Serializable)factoryKey); //key entity를 이용한 조회
-			// -- <<  조회 부분 끝  >> ---
-			
-			currSession.endTransaction(false);
-=======
->>>>>>> udmtek:src/main/java/com/udmtek/DBCoreTest/DBCoreTestClass.java
 		}
 		
 		
