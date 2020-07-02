@@ -31,18 +31,18 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 @Configuration
 @EnableJpaRepositories(
-        basePackages={"com.udmtek.DBCore.model.*"},
+        basePackages={"com.udmtek.DBCore"},
         entityManagerFactoryRef = "DBCoreEntityManagerFactory",
         transactionManagerRef = "DBCoreTransacionManager")
-@Profile("!dev")
-public class DBCoreConfigClass {
-	@Value("${spring.datasource.mes.driverClassName}") 
+@Profile("dev")
+public class DBCoreDevConfigClass {
+	@Value("${hibernate.connection.driver_class}") 
 	String driverClassName;
-	@Value("${spring.datasource.mes.username}")
+	@Value("${hibernate.connection.username}")
 	String userName;
-	@Value("${spring.datasource.mes.password}") 
+	@Value("${hibernate.connection.password}") 
 	String passWord;
-	@Value("${spring.datasource.mes.url}") 
+	@Value("${hibernate.connection.url}") 
 	String jdbcUrl;
 	
 	@Value("${hibernate.hikari.maximumPoolSize}") 
@@ -62,18 +62,8 @@ public class DBCoreConfigClass {
 		return Collections.synchronizedMap(new HashMap<String,DBCoreSessionManager>());
 	}
 	
-<<<<<<< HEAD
-	/**
-	 * make bean object of Set<DBCoreSession>
-	 * @return Set<DBCoreSession>
-	 */
-	@Bean(name="getList")
-	@Scope(value="prototype")
-	public Set<DBCoreSession> getList() {
-		return Collections.synchronizedSet(new HashSet<DBCoreSession>());
-=======
 	@Bean(destroyMethod = "shutdown")
-	public DataSource DBCoreDefaultDataSource() {
+	public DataSource defaultDataSource() {
 			
 		HikariDataSource dataSource = new HikariDataSource();
 		dataSource.setDriverClassName(driverClassName);
@@ -87,7 +77,7 @@ public class DBCoreConfigClass {
 	
 	@Bean(name = "DBCoreEntityManagerFactory")
 	public EntityManagerFactory DBCoreEntityManagerFactory() {
-		DBCoreLogger.printTrace("DBCORE:" + driverClassName 
+		DBCoreLogger.printInfo("DBCORE:" + driverClassName 
 	               + ":" + userName
 	               + ":" + passWord
 	               + ":" + jdbcUrl
@@ -98,8 +88,8 @@ public class DBCoreConfigClass {
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		vendorAdapter.setShowSql(true);
         factoryBean.setJpaVendorAdapter(vendorAdapter);
-        factoryBean.setDataSource(DBCoreDefaultDataSource());
-        factoryBean.setPackagesToScan("com.udmtek.DBCore.model.*");
+        factoryBean.setDataSource(defaultDataSource());
+        factoryBean.setPackagesToScan("com.udmtek.*");
         Properties hikariproperties = new Properties();
         hikariproperties.put("hibernate.hikari.maximumPoolSize",maxPoolSize);
         factoryBean.setJpaProperties(hikariproperties);
@@ -120,15 +110,13 @@ public class DBCoreConfigClass {
 		return myaccessor;
 	}
 	
-	@Bean(name="DBCoreSessionFactory")
+	@Bean(name="sessionFactory")
 	@DependsOn({"getMap","DBCoreEntityManagerFactory","DBAccessManager" })
-	public SessionFactory DBCoreSessionFactory(
-			@Qualifier("DBCoreEntityManagerFactory") EntityManagerFactory emf) {
+	public SessionFactory sessionFactory(EntityManagerFactory emf) {
 	    HibernateJpaSessionFactoryBean fact = new HibernateJpaSessionFactoryBean();
 	    fact.setEntityManagerFactory(emf);
 	    return fact.getObject();
 	}
-
 	
 	@Bean(name="DBCoreTransacionManager")
 	public JpaTransactionManager DBCoretransactionManager(
@@ -139,19 +127,10 @@ public class DBCoreConfigClass {
 	}
 	
 	@Bean(name="DBManager")
-	@DependsOn({"DBCoreSessionFactory" })
-	public DBCoreSessionManager getDBManager(
-			@Qualifier("DBCoreSessionFactory") SessionFactory sessionFactory) {
+	@DependsOn({"sessionFactory" })
+	public DBCoreSessionManager getDBManager(SessionFactory sessionFactory) {
 		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");
 		return returnManager;
->>>>>>> udmtek
-	}
-	
-	@Bean(name="getUseSessionMap")
-	@Scope(value="prototype")
-	public Map<Thread, DBCoreSession> getUseSessionMap() {
-		return Collections.synchronizedMap(new HashMap<Thread, DBCoreSession>());
-	}
+	}	
 }
-

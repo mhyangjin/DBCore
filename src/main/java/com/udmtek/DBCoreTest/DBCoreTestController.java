@@ -1,4 +1,6 @@
-package com.udmtek.DBCore.TestModule;
+package com.udmtek.DBCoreTest;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -11,8 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
-import com.udmtek.model.Factory;
+import com.udmtek.DBCore.model.factory.Factory;
+import com.udmtek.DBCore.model.factory.FactoryDTO;
 
 /**
  * @author julu1 <julu1 @ naver.com >
@@ -22,14 +24,16 @@ import com.udmtek.model.Factory;
 public class DBCoreTestController {
 	@Autowired
 	ApplicationContext context;
-	@Autowired
-	DBCoreAccessManager DBAccessor;
 
+	
 	@RequestMapping(value="/")
 	public String testGuid() {
+
+		DBCoreLogger.printInfo("testGuid");
 		return "main";
+		
 	}
-	
+
 	@RequestMapping(value="SessionPoolTestForm")
 	public String SessionPoolTestForm() {
 		return "SessionPoolTestForm";
@@ -41,10 +45,12 @@ public class DBCoreTestController {
 		ModelAndView mv=new ModelAndView("FactoryList");
 		mv.addObject("sourceType",sourceType);
 		if ( sourceType.equals("DAOImpl")) {
+			DBCoreLogger.printInfo("Factory read Test..DAOImpl");
 			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 			mv.addObject("List", Mystart.readFactory());
 		}
 		if ( sourceType.equals("Annotation")) {
+			DBCoreLogger.printInfo("Factory read Test..Annotation");
 			FactoryService factoryService=context.getBean(FactoryService.class);
 			mv.addObject("List", factoryService.readFactory());
 		}
@@ -67,7 +73,6 @@ public class DBCoreTestController {
 	@ResponseBody
 	public String sessionTest(@RequestParam("SessionNo") int SessionNo) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-		
 		for(int i=0; i< SessionNo; i++)
 			Mystart.testDBCoreSesion();
 	
@@ -91,7 +96,8 @@ public class DBCoreTestController {
 		
 		if ( sourceType.equals("DAOImpl")) {	
 			DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
-			mv.addObject("FactoryId", Mystart.readFactoryWithKey(memberCorpid,factoryid));
+			FactoryDTO factory=(FactoryDTO) Mystart.readFactoryWithKey(memberCorpid,factoryid);
+			mv.addObject("FactoryId",factory );
 		}
 		if ( sourceType.equals("Annotation")) {
 			FactoryService factoryService=context.getBean(FactoryService.class);
@@ -103,7 +109,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/updateDataWithKey")
 	@ResponseBody
-	public String updateDataWithKey( Factory myfactory,
+	public String updateDataWithKey( FactoryDTO myfactory,
 			@RequestParam("sourceType") String sourceType) {
 		String Result=null;
 		
@@ -140,7 +146,7 @@ public class DBCoreTestController {
 	
 	@GetMapping(value="/insertFactory")
 	@ResponseBody
-	public String insertFactory( Factory myfactory) {
+	public String insertFactory( FactoryDTO myfactory) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 		return Mystart.insertFactory(myfactory);
 	}

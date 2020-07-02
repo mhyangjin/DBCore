@@ -1,12 +1,7 @@
 package com.udmtek.DBCore.DBAccessor;
 
-import javax.persistence.EntityManager;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
-import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
-
 
 /**
  * interface DBCoreSession
@@ -20,7 +15,7 @@ public interface DBCoreSession{
 	 * @param SessionFactory, String 
 	 * @return void
 	 */
-	public void readyConnect(SessionFactory argFactory, String argSessionName);
+	public void readyConnect(SessionFactory sessionFactory, String argSessionName);
 	
 	/**
 	 * get Session and create an EntityManager
@@ -41,6 +36,10 @@ public interface DBCoreSession{
 	 */
 	public boolean beginTransaction(boolean ReadOnly);
 	
+<<<<<<< HEAD
+=======
+	public Session getThisSession();
+>>>>>>> udmtek
 	/**
 	 * end the transaction
 	 * @param CommitOK (true:commit,false:rollback)
@@ -82,27 +81,6 @@ public interface DBCoreSession{
 	 * @return sessionFactory
 	 */
 	public SessionFactory getSessionFactory();
-	
-	/**
-	 * get the EntityManager
-	 * @param
-	 * @return EntityManager
-	 */
-	public EntityManager getEntityManager();
-	
-	/**
-	 * get DAOImpl of T
-	 * @param
-	 * @return T
-	 */
-	public <T> T getDAOImpl(Class<T> type);
-	
-	/**
-	 * get DAOImpl using TableName
-	 * @param
-	 * @return GenericDAOImpl<?>
-	 */
-	public GenericDAOImpl<?> getDAOImpl(String TableName);
 
-
+	public boolean isBeginTransaction();
 }

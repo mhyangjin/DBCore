@@ -13,7 +13,19 @@ public enum SessionStateEnum {
 	private String SessionState;
 	private List<String> methods;
 	
+<<<<<<< HEAD
 	SessionStateEnum(String string, List<String> methods) {
 		this.methods = methods;
 	} 
 }
+=======
+	SessionStateEnum(String SessionState, List<String> methods) {
+		this.SessionState = SessionState;
+		this.methods = methods;
+	}
+	
+	public boolean isPossibleProcess(String Next) {
+		return (methods.contains(Next));
+	}
+}
+>>>>>>> udmtek

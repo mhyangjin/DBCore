@@ -1,30 +1,25 @@
-/**
- * 
- */
 package com.udmtek.DBCore.DBAccessor;
 
 import javax.persistence.EntityManager;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-import com.udmtek.DBCore.DAOModel.GenericDAOImpl;
 
 
 /** Implementation of the DBCoreSession
  * @author julu1 <julu1 @ naver.com >
  * @version version 0.1.0
  */
-@Component
+@Component("DBCoreSession")
 @Scope(value = "prototype")
-@ComponentScan("com.udmtek.model")
 public class DBCoreSessionImpl implements DBCoreSession {
+<<<<<<< HEAD
 	public enum State { 
 		INIT,
 		OPENDED,
@@ -46,20 +41,37 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	private int EntityManagerSeq=0;
 	
 	private Transaction currTransaction=null;
+=======
+	@Autowired
+	ApplicationContext context;
+	
+	private SessionFactory sessionFactory=null;
+	private String SessionName="";
+	SessionStateEnum sessionState;	
+
+	private Session thisSession=null;
+	private int SessionSeq=0;
+	
+>>>>>>> udmtek
 	private int TransactionSeq=0;
 	private boolean ReadOnly;
 	
 	
 	@Override
-	public void readyConnect(SessionFactory argFactory, String argSessionName) {
-		mySessionFactory=argFactory;
+	public void readyConnect(SessionFactory sessionFactory, String argSessionName) {
+		this.sessionFactory=sessionFactory;
 		SessionName=argSessionName;
+<<<<<<< HEAD
 		sessionState=State.INIT;
+=======
+		sessionState=SessionStateEnum.INIT;
+>>>>>>> udmtek
 	}
 	
 	@Override
 	public boolean openSession()
 	{
+<<<<<<< HEAD
 		thisSession=mySessionFactory.openSession();
 		myentityManager=mySessionFactory.createEntityManager();
 		if (EntityManagerSeq >= 2147483647 ) {
@@ -67,25 +79,50 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		}
 		EntityManagerSeq++;
 		sessionState=State.OPENDED;
+=======
+		if ( !sessionState.isPossibleProcess("openSession"))
+			DBCoreLogger.printDBError("openSession" + sessionState.isPossibleProcess("openSession"));
+		
+		thisSession=sessionFactory.openSession();
+		if (SessionSeq >= 2147483647 ) {
+			SessionSeq=1;
+		}
+		SessionSeq++;
+		sessionState=SessionStateEnum.OPEN;
+>>>>>>> udmtek
 		return true;
 	}
 	
 	@Override
 	public boolean closeSession() {
+		if ( !sessionState.isPossibleProcess("closeSession"))
+		DBCoreLogger.printDBError("closeSession" + sessionState.isPossibleProcess("closeSession"));
+		
 		thisSession.close();
-		myentityManager.close();
 		thisSession=null;
+<<<<<<< HEAD
 		myentityManager=null;
 		sessionState=State.INIT;
 		return true;
 	}
 	
+=======
+		sessionState=SessionStateEnum.INIT;
+		return true;
+	}
+	
+	@Override
+	public Session getThisSession() {
+		return thisSession;
+	}
+>>>>>>> udmtek
 	
 	@Override
 	public String getTransactionID() {
 		String TransactionID=SessionName;
 		switch (sessionState) {
 		case INIT:
+<<<<<<< HEAD
 			TransactionID = TransactionID + ":";
 			break;
 		case OPENDED:
@@ -93,6 +130,19 @@ public class DBCoreSessionImpl implements DBCoreSession {
 			break;
 		case BEGINED:
 			TransactionID = TransactionID +"["+EntityManagerSeq +":"+TransactionSeq + "]";
+=======
+			TransactionID = TransactionID + "..";
+			break;
+		case OPEN:
+			TransactionID = TransactionID +"."+SessionSeq +".";
+			break;
+		case BEGIN:
+			TransactionID = TransactionID +"."+SessionSeq +"."+TransactionSeq;
+			break;
+		case END:
+			TransactionID = TransactionID +"."+SessionSeq +".";
+			break;
+>>>>>>> udmtek
 		default:
 			break;
 		}
@@ -101,71 +151,68 @@ public class DBCoreSessionImpl implements DBCoreSession {
 
 	@Override
 	public boolean beginTransaction(boolean ReadOnly) {
+		if ( !sessionState.isPossibleProcess("beginTransaction"))
+			DBCoreLogger.printDBError("beginTransaction" + sessionState.isPossibleProcess("beginTransaction"));
+		
 		this.ReadOnly = ReadOnly;
+<<<<<<< HEAD
 		currTransaction=thisSession.getTransaction();
 		currTransaction.begin();
+=======
+		thisSession.getTransaction().begin();
+>>>>>>> udmtek
 		
 		if (TransactionSeq >= 2147483647 ) {
 			TransactionSeq=1;
 		}
 		TransactionSeq++;
+<<<<<<< HEAD
 		sessionState=State.BEGINED;
+=======
+		sessionState=SessionStateEnum.BEGIN;
+>>>>>>> udmtek
 		return true;
 	}
 
 	@Override
 	public boolean endTransaction(boolean CommitOK) {
+		if ( !sessionState.isPossibleProcess("endTransaction"))
+			DBCoreLogger.printDBError("endTransaction" + sessionState.isPossibleProcess("endTransaction"));
+		
 		boolean CommitResult=false;
-		if ( currTransaction == null )	{
-			//Exception throw
-			return CommitResult;
-		}
-
+		
 		try {
 			if ( this.ReadOnly==false && CommitOK)
 			{
-				DBCoreLogger.printInfo("COMMIT");
-				myentityManager.flush();
-				currTransaction.commit();
+				thisSession.flush();
+				thisSession.getTransaction().commit();
 			}
 			else
-				currTransaction.rollback();
+				thisSession.getTransaction().rollback();
 			CommitResult=true;
+			sessionState=SessionStateEnum.OPEN;
 		} catch (Exception e)	 {
-			e.printStackTrace();
+			DBCoreLogger.printDBError(e.toString());
 			throw (e);
 		}
+<<<<<<< HEAD
 		
 		currTransaction=null;
 		sessionState=State.INIT;
+=======
+>>>>>>> udmtek
 		return CommitResult;
 	}
 	
 	@Override
 	public SessionFactory getSessionFactory() {
-		return mySessionFactory;
-	}
-	
-	@Override
-	public EntityManager getEntityManager() {
-		return myentityManager;
-	}
-	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public <T> T getDAOImpl(Class<T> type) {
-		T TImpl=context.getBean( type);
-		((GenericDAOImpl) TImpl).setEntityManager(myentityManager);
-		return TImpl;	
+		return sessionFactory;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public GenericDAOImpl<?> getDAOImpl(String TableName) {
-		String DAOName=TableName + "DAOImpl";
-		GenericDAOImpl DAOImpl=(GenericDAOImpl)context.getBean(DAOName);
-		DAOImpl.setEntityManager(myentityManager);
-		return DAOImpl;	
+	public boolean isBeginTransaction() {
+		if (sessionState == SessionStateEnum.BEGIN) return true;
+		return false;
 	}
 	
 	@Override

@@ -2,124 +2,165 @@ package com.udmtek.DBCore.DAOModel;
 
 import java.io.Serializable;
 import java.util.List;
-
-import javax.persistence.EntityManager;
-
+import java.util.Map;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
-
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-
+import com.udmtek.DBCore.DBAccessor.DBCoreLokMode;
+import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 
 /**
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
-public class GenericDAOImpl <T extends EntityDAO> implements GenericDAO<T> {
-	private Class<T> type;
-	protected EntityManager myEntityMgr=null;
+public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extends DBCoreDTOMapper<E,D>>
+			implements GenericDAO<E,D,M> {
+	private Class<E> entityType;
+	private Class<D> dtoType;
+	private M mapperObject;
+	
 	@Autowired
 	ApplicationContext context;
 	
-	public GenericDAOImpl(Class<T> type) {
+	public GenericDAOImpl(Class<E> entityType, Class<D> dtoType) {
 		super();
-		this.type = type;
+		this.entityType = entityType;
+		this.dtoType = dtoType;
 	}
 	
-	public void setEntityManager(EntityManager argEntityMgr) {
-		this.myEntityMgr = argEntityMgr;
-	}
-	
-	@Override
-	public T get(Serializable key) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
-		return (T) myEntityMgr.find(type, key);
-	}
-
-	@Override
-	public Serializable getKey(T object) {
-		object.getKey();
-		return null;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	@Override
-	public GenericKeyDAOImpl<?> getKeyDAOImpl(String tableName) {
-		String DAOName=tableName + "IdDAOImpl";
-		GenericKeyDAOImpl keyDAOImpl=(GenericKeyDAOImpl)context.getBean(DAOName);
-		return keyDAOImpl;	
-	}
-
-
-	@Override
-	public List<T> getfromJPQL(String Jquery) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
-		return myEntityMgr.createQuery(Jquery,type).getResultList();
+	@Autowired
+	public void setMapperObject(M mapperObject) {
+		this.mapperObject = mapperObject;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<T> getfromSQL(String sqlquery) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
-		return myEntityMgr.createNativeQuery(sqlquery,type).getResultList();
+	public D get(Serializable key) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		DBCoreEntity result;
+		result = currSession.get(entityType, key);
+		return (D) mapperObject.toDto((E)result);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<T> getAll() {
-			if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return null;
-		}
+	public D get(Serializable key, DBCoreLokMode lockMode) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		DBCoreEntity result;
+		result = currSession.get(entityType, key,lockMode.getHibernateLock());
+		return (D) mapperObject.toDto((E)result);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getfromJPQL(String Hquery) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		List<E> entities=currSession.createQuery(Hquery).list();
+		
+		return (List<D>) mapperObject.toDto(entities);
+	}
 	
-		return myEntityMgr.createQuery("select m from " + type.getName() + " m").getResultList();
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getfromSQL(String sqlquery) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		List<Map<String, Object>> entities= currSession.createSQLQuery(sqlquery).addEntity(entityType).list();
+		return (List<D>) mapperObject.toDto((List<E>)entities);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getfromSQL(String sqlquery, DBCoreLokMode lockMode) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		List<Map<String, Object>> entities=	currSession.createSQLQuery(sqlquery)
+											.addEntity(entityType)
+											.setLockMode("this", lockMode.getHibernateLock())
+											.list();
+		return (List<D>) mapperObject.toDto((List<E>)entities);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getfromSQL(Map<String, Object> params) {
+		String queryString= "select * from " + entityType.getName();
+		
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		SQLQuery query=currSession.createSQLQuery(queryString);
+		for (String key : params.keySet()) {
+			query.setParameter(key, params.get(key));
+		}
+		List<Map<String, Object>> entities = query.addEntity(entityType).list();
+		return (List<D>) mapperObject.toDto((List<E>)entities);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getfromSQL(Map<String, Object> params, DBCoreLokMode lockMode) {
+		String queryString= "select * from " + entityType.getName();
+		
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		SQLQuery query=currSession.createSQLQuery(queryString);
+		for (String key : params.keySet()) {
+			query.setParameter(key, params.get(key));
+		}
+		List<Map<String, Object>> entities = query.addEntity(entityType)
+											.setLockMode("this", lockMode.getHibernateLock())
+											.list();
+		return (List<D>) mapperObject.toDto((List<E>)entities);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<D> getAll() {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		List<E> entities=  currSession.createQuery("select m from " + entityType.getName() + " m").list();
+		return (List<D>) mapperObject.toDto(entities);		
 	}
 
 	@Override
-	public void insert(T object) throws DataAccessException {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
-		}
-		myEntityMgr.persist(object);
+	public void insert(D object) throws DataAccessException {
+		E entity=(E) mapperObject.toEntity(object);
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		currSession.persist(entity);
 	}
 
 	@Override
-	public void save(T Object) {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
-		}
-		myEntityMgr.merge(Object);
+	public void update(D object) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		E entity=(E) mapperObject.toEntity(object);
+		currSession.merge(entity);
 	}
 
 	@Override
-	public void delete(T object) throws DataAccessException {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
-		}
-		myEntityMgr.remove(object);
+	public void delete(D object) throws DataAccessException {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		E entity=(E) mapperObject.toEntity(object);
+		currSession.delete(entity);
 	}
 	
 	@Override
 	public void delete(Serializable object) throws DataAccessException {
-		if (myEntityMgr == null ) {
-			DBCoreLogger.printError("Entity Manager is null.");
-			return;
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		currSession.delete(getEntity(object));
+	}
+
+	@Override
+	public int delete(Map<String, Object> params) {
+		String queryString= "delete from " + entityType.getName();
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		SQLQuery query=currSession.createSQLQuery(queryString);
+		for (String key : params.keySet()) {
+			query.setParameter(key, params.get(key));
 		}
-		T findObject=get(object);
-		myEntityMgr.remove(findObject);
+		int result= query.executeUpdate();
+		return result;
 	}
 	
+	private E getEntity(Serializable key) {
+		Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
+		return (E)currSession.get(entityType, key);
+	}
+
 }

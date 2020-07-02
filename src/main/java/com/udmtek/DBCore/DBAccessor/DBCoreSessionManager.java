@@ -1,6 +1,9 @@
 package com.udmtek.DBCore.DBAccessor;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.SessionFactory;
+
 
 /**
  * management DBCoreSession set.
@@ -13,6 +16,16 @@ public interface DBCoreSessionManager{
 	 * It will be can get DBCoreSession in current thread.
 	 */
 	public static ThreadLocal<DBCoreSession> DBSession=new ThreadLocal<DBCoreSession>();	
+<<<<<<< HEAD
+=======
+	/**
+	 * get opended session in current thread.
+	 * @param
+	 * @return DBCoreSession
+	 */
+	public static DBCoreSession getCurrentSession() { return DBSession.get();} 
+
+>>>>>>> udmtek
 	/**
 	 * make connection with specified Database
 	 * @param String  : persistence-unit name in peristence.xml
