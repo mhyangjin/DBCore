@@ -1,14 +1,12 @@
 package com.udmtek.DBCore.DBAccessor;
 
-import javax.persistence.EntityManager;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
+import com.udmtek.DBCore.ComException.DBAccessException;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 
@@ -32,19 +30,27 @@ public class DBCoreSessionImpl implements DBCoreSession {
 	private int TransactionSeq=0;
 	private boolean ReadOnly;
 	
-	
+	/**
+	 * set Session Factory and Session Name in Empty DBCoreSession
+	 * @param SessionFactory, String 
+	 * @return void
+	 */
 	@Override
 	public void readyConnect(SessionFactory sessionFactory, String argSessionName) {
 		this.sessionFactory=sessionFactory;
 		SessionName=argSessionName;
 		sessionState=SessionStateEnum.INIT;
 	}
-	
+	/**
+	 * get Session and create an EntityManager
+	 * @return SessionStateEnum
+	 * @exception DBAccessException
+	 */
 	@Override
-	public boolean openSession()
-	{
-		if ( !sessionState.isPossibleProcess("openSession"))
-			DBCoreLogger.printDBError("openSession" + sessionState.isPossibleProcess("openSession"));
+	public SessionStateEnum openSession() throws DBAccessException {
+		if ( !sessionState.isPossibleProcess("openSession")) {
+			throw new DBAccessException(sessionState.toString(),"["+ getTransactionID() + "] can not openSession");
+		}
 		
 		thisSession=sessionFactory.openSession();
 		if (SessionSeq >= 2147483647 ) {
@@ -52,25 +58,35 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		}
 		SessionSeq++;
 		sessionState=SessionStateEnum.OPEN;
-		return true;
+		return sessionState;
 	}
-	
+	/**
+	 * return session, close EntityManager
+	 * @return SessionStateEnum
+	 * @exception DBAccessException
+	 */
 	@Override
-	public boolean closeSession() {
+	public SessionStateEnum closeSession() throws DBAccessException {
 		if ( !sessionState.isPossibleProcess("closeSession"))
-		DBCoreLogger.printDBError("closeSession" + sessionState.isPossibleProcess("closeSession"));
+			throw new DBAccessException(sessionState.toString(),"["+ getTransactionID() + "] can not closeSession");
 		
 		thisSession.close();
 		thisSession=null;
 		sessionState=SessionStateEnum.INIT;
-		return true;
+		return sessionState;
 	}
-	
+	/**
+	 * get Session of current Session
+	 * @return Session
+	 */
 	@Override
 	public Session getThisSession() {
 		return thisSession;
 	}
-	
+	/**
+	 * get the transactionID
+	 * @return add sequential number to given Session name from DBCoreSessionManager 
+	 */
 	@Override
 	public String getTransactionID() {
 		String TransactionID=SessionName;
@@ -92,11 +108,16 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		}
 		return TransactionID;
 	}
-
+	/**
+	 * begin transaction
+	 * @param ReadOnly (true:read, false:writable)
+	 * @return SessionStateEnum
+	 * @exception DBAccessException
+	 */
 	@Override
-	public boolean beginTransaction(boolean ReadOnly) {
+	public SessionStateEnum beginTransaction(boolean ReadOnly) throws DBAccessException  {
 		if ( !sessionState.isPossibleProcess("beginTransaction"))
-			DBCoreLogger.printDBError("beginTransaction" + sessionState.isPossibleProcess("beginTransaction"));
+			throw new DBAccessException(sessionState.toString(),"["+ getTransactionID() + "] can not beginTransaction");
 		
 		this.ReadOnly = ReadOnly;
 		thisSession.getTransaction().begin();
@@ -106,16 +127,19 @@ public class DBCoreSessionImpl implements DBCoreSession {
 		}
 		TransactionSeq++;
 		sessionState=SessionStateEnum.BEGIN;
-		return true;
+		return sessionState;
 	}
-
+	/**
+	 * end the transaction
+	 * @param CommitOK (true:commit,false:rollback)
+	 * @return return true if success otherwise false.
+	 * @exception DBAccessException
+	 */
 	@Override
-	public boolean endTransaction(boolean CommitOK) {
+	public SessionStateEnum endTransaction(boolean CommitOK) throws DBAccessException  {
 		if ( !sessionState.isPossibleProcess("endTransaction"))
-			DBCoreLogger.printDBError("endTransaction" + sessionState.isPossibleProcess("endTransaction"));
-		
+			throw new DBAccessException(sessionState.toString(),"["+ getTransactionID() + "] can not endTransaction");
 		boolean CommitResult=false;
-		
 		try {
 			if ( this.ReadOnly==false && CommitOK)
 			{
@@ -124,24 +148,28 @@ public class DBCoreSessionImpl implements DBCoreSession {
 			}
 			else
 				thisSession.getTransaction().rollback();
-			CommitResult=true;
+			
 			sessionState=SessionStateEnum.OPEN;
 		} catch (Exception e)	 {
 			DBCoreLogger.printDBError(e.toString());
-			throw (e);
+			new DBAccessException(e.getMessage());
 		}
-		return CommitResult;
+		return sessionState;
 	}
-	
+	/**
+	 * get the sessionFactory
+	 * @return sessionFactory
+	 */
 	@Override
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
 	}
-
+	/**
+	 * get current Session State
+	 * @return SessionStateEnum
+	 */
 	@Override
-	public boolean isBeginTransaction() {
-		if (sessionState == SessionStateEnum.BEGIN) return true;
-		return false;
+	public SessionStateEnum getSessionState() {
+		return sessionState;
 	}
-
 }

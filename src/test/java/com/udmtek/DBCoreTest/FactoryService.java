@@ -23,6 +23,9 @@ public class FactoryService{
 	@Autowired
 	ApplicationContext context;
 	
+	public FactoryService() {
+	}
+	
 	//FactoryDAO 를 이용한 all select 기능
 	@DBCoreReadTransactional
 	public List<FactoryDTO>  readFactory( ) {
@@ -42,7 +45,7 @@ public class FactoryService{
 		//--- << 조회 부분 시작 >> ---
 		FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
 		Factory.Key factoryKey=new Factory.Key(argmemberCorpId,argfactoryId );	//key entity 생성
-		FactoryDTO findFactory=factoryDao.get((Serializable)factoryKey); //key entity를 이용한 조회
+		FactoryDTO findFactory=factoryDao.get(factoryKey); //key entity를 이용한 조회
 		// -- <<  조회 부분 끝  >> ---
 		DBCoreLogger.printInfo("findFactory" + findFactory.toString());
 		return findFactory;

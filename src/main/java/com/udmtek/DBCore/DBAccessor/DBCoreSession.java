@@ -6,7 +6,7 @@ import org.hibernate.SessionFactory;
 /**
  * interface DBCoreSession
  * @author julu1 <julu1 @ naver.com >
- * @version 0.1.0
+ * @version 0.3.0
  */
 public interface DBCoreSession{
 	/**
@@ -18,43 +18,47 @@ public interface DBCoreSession{
 	
 	/**
 	 * get Session and create an EntityManager
-	 * @param 
-	 * @return boolean : return true if success otherwise false.
+	 * @return SessionStateEnum
 	 */
-	public boolean openSession();
+	public SessionStateEnum openSession();
 	/**
 	 * return session, close EntityManager
-	 * @param 
-	 * @return return true if success otherwise false.
+	 * @return SessionStateEnum
 	 */
-	public boolean closeSession();
+	public SessionStateEnum closeSession();
 	/**
 	 * begin transaction
 	 * @param ReadOnly (true:read, false:writable)
-	 * @return return true if success otherwise false.
+	 * @return SessionStateEnum
 	 */
-	public boolean beginTransaction(boolean ReadOnly);
+	public SessionStateEnum beginTransaction(boolean ReadOnly);
 	
+	/**
+	 * get Session of current Session
+	 * @return Session
+	 */
 	public Session getThisSession();
 	/**
 	 * end the transaction
 	 * @param CommitOK (true:commit,false:rollback)
 	 * @return return true if success otherwise false.
 	 */
-	public boolean endTransaction(boolean CommitOK);
+	public SessionStateEnum endTransaction(boolean CommitOK);
 	/**
 	 * get the transactionID
-	 * @param 
 	 * @return add sequential number to given Session name from DBCoreSessionManager 
 	 */
 	public String getTransactionID();
 	
 	/**
 	 * get the sessionFactory
-	 * @param 
 	 * @return sessionFactory
 	 */
 	public SessionFactory getSessionFactory();
 
-	public boolean isBeginTransaction();
+	/**
+	 * get current Session State
+	 * @return SessionStateEnum
+	 */
+	public SessionStateEnum getSessionState();
 }

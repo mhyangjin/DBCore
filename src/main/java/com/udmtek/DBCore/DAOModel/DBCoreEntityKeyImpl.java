@@ -2,23 +2,31 @@ package com.udmtek.DBCore.DAOModel;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+
+import com.udmtek.DBCore.ComException.DBTypeException;
+import com.udmtek.DBCore.ComException.InvalidNullableException;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /**
+ * Implementation of the DBCoreEntityKey
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
   */
 public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2403101385254750155L;
 	private Class<?> type;
 	
+	/**
+	 * constructor
+	 * @param sub class type.
+	 */
 	public DBCoreEntityKeyImpl(Class<?> type) {
 		this.type = type;
 	}
-
+	/**
+	 * get column names 
+	 * @return String[]
+	 */
 	@Override
 	public String[] getKeyColumns() {
 		Field[] columns = type.getDeclaredFields();
@@ -28,24 +36,34 @@ public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
 		}
 		return columnNames;
 	}
-
+	/**
+	 * check all columns are not empty.
+	 * @return boolean : return false if one or more is empty, or not true.
+	 * @exception InvalidNullableException, DBTypeException
+	 */
 	@Override
-	public boolean isValid() {
-		boolean vaild=true;
+	public boolean isValid() throws InvalidNullableException, DBTypeException{
 		Field[] columns = type.getDeclaredFields();
+		InvalidNullableException exception=null;
 		for ( int i=0; i < columns.length; i++) {
 			String ColumnName=columns[i].getName();
 			String getMethodName="get" + ColumnName.toUpperCase().charAt(0) + ColumnName.substring(1);
 			try {
 				String Res=(String) type.getMethod(getMethodName).invoke(this);
-				if ( Res.length() <0 )
-					vaild=false;
+				if ( Res.length() <= 0 )
+				{
+					if ( exception == null)
+						exception = new InvalidNullableException();
+					exception.addFieldError(ColumnName, "NULL");
+				}
 			} catch (Exception e) {
-				vaild=false;
-				break;
+				throw new DBTypeException(type.getSimpleName(), e.getMessage());
 			}
 		}
-		return vaild;
+		
+		if ( exception != null)
+			throw exception;
+		return true;
 		
 	}
 	
@@ -59,7 +77,7 @@ public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
 	}
 	
 	@Override
-	public int hashCode() {
+	public int hashCode() throws DBTypeException{
 		Field[] columns = type.getDeclaredFields();
 		String[] columnValues= new String[columns.length];
 		for ( int i=0; i < columns.length; i++) {
@@ -68,7 +86,7 @@ public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
 			try {
 				columnValues[i]=(String) type.getMethod(getMethodName).invoke(this);
 			} catch (Exception e) {
-				break;
+				throw new DBTypeException(type.getSimpleName(), e.getMessage());
 			}
 		}
 		return Arrays.hashCode(columnValues);

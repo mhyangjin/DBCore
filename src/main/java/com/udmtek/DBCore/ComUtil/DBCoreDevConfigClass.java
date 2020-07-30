@@ -19,6 +19,8 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import com.udmtek.DBCore.ComException.NationErrorMessages;
+import com.udmtek.DBCore.ComException.PersonLanguage;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManagerImpl;
@@ -31,7 +33,7 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 @Configuration
 @EnableJpaRepositories(
-        basePackages={"com.udmtek.DBCore"},
+        basePackages={"com.udmtek.DBCore.*"},
         entityManagerFactoryRef = "DBCoreEntityManagerFactory",
         transactionManagerRef = "DBCoreTransacionManager")
 @Profile("dev")
@@ -63,7 +65,7 @@ public class DBCoreDevConfigClass {
 	}
 	
 	@Bean(destroyMethod = "shutdown")
-	public DataSource defaultDataSource() {
+	public DataSource DBCoreDefaultDataSource() {
 			
 		HikariDataSource dataSource = new HikariDataSource();
 		dataSource.setDriverClassName(driverClassName);
@@ -77,7 +79,7 @@ public class DBCoreDevConfigClass {
 	
 	@Bean(name = "DBCoreEntityManagerFactory")
 	public EntityManagerFactory DBCoreEntityManagerFactory() {
-		DBCoreLogger.printInfo("DBCORE:" + driverClassName 
+		DBCoreLogger.printTrace("DBCORE:" + driverClassName 
 	               + ":" + userName
 	               + ":" + passWord
 	               + ":" + jdbcUrl
@@ -88,8 +90,8 @@ public class DBCoreDevConfigClass {
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		vendorAdapter.setShowSql(true);
         factoryBean.setJpaVendorAdapter(vendorAdapter);
-        factoryBean.setDataSource(defaultDataSource());
-        factoryBean.setPackagesToScan("com.udmtek.*");
+        factoryBean.setDataSource(DBCoreDefaultDataSource());
+        factoryBean.setPackagesToScan("com.udmtek.DBCore.*");
         Properties hikariproperties = new Properties();
         hikariproperties.put("hibernate.hikari.maximumPoolSize",maxPoolSize);
         factoryBean.setJpaProperties(hikariproperties);
@@ -110,13 +112,15 @@ public class DBCoreDevConfigClass {
 		return myaccessor;
 	}
 	
-	@Bean(name="sessionFactory")
+	@Bean(name="DBCoreSessionFactory")
 	@DependsOn({"getMap","DBCoreEntityManagerFactory","DBAccessManager" })
-	public SessionFactory sessionFactory(EntityManagerFactory emf) {
+	public SessionFactory DBCoreSessionFactory(
+			@Qualifier("DBCoreEntityManagerFactory") EntityManagerFactory emf) {
 	    HibernateJpaSessionFactoryBean fact = new HibernateJpaSessionFactoryBean();
 	    fact.setEntityManagerFactory(emf);
 	    return fact.getObject();
 	}
+
 	
 	@Bean(name="DBCoreTransacionManager")
 	public JpaTransactionManager DBCoretransactionManager(
@@ -127,10 +131,21 @@ public class DBCoreDevConfigClass {
 	}
 	
 	@Bean(name="DBManager")
-	@DependsOn({"sessionFactory" })
-	public DBCoreSessionManager getDBManager(SessionFactory sessionFactory) {
+	@DependsOn({"DBCoreSessionFactory" })
+	public DBCoreSessionManager getDBManager(
+			@Qualifier("DBCoreSessionFactory") SessionFactory sessionFactory) {
 		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");
 		return returnManager;
-	}	
+	}
+	
+	@Bean(name="nationErrorMessages")
+	public NationErrorMessages getErrorMessages() {
+		return new NationErrorMessages().defaultMessages();
+	}
+	
+	@Bean(name="personLanguage")
+	public PersonLanguage getPersonLanguage() {
+		return new PersonLanguage();
+	}
 }

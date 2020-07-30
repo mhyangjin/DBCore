@@ -19,6 +19,8 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+
+import com.udmtek.DBCore.ComException.NationErrorMessages;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManagerImpl;
@@ -27,13 +29,14 @@ import com.zaxxer.hikari.HikariDataSource;
 
 /** This is Configuration.
  * @author julu1 <julu1 @ naver.com >
- * @version 0.1.0
+ * @version 0.3.0
  */
 @Configuration
 @EnableJpaRepositories(
         basePackages={"com.udmtek.DBCore.model.*"},
         entityManagerFactoryRef = "DBCoreEntityManagerFactory",
         transactionManagerRef = "DBCoreTransacionManager")
+
 @Profile("!dev")
 public class DBCoreConfigClass {
 	@Value("${spring.datasource.mes.driverClassName}") 
@@ -61,7 +64,10 @@ public class DBCoreConfigClass {
 	public Map<String,DBCoreSessionManager> getMap() {
 		return Collections.synchronizedMap(new HashMap<String,DBCoreSessionManager>());
 	}
-	
+	/**
+	 * make bean object of HikariDataSource
+	 * @return DataSource
+	 */
 	@Bean(destroyMethod = "shutdown")
 	public DataSource DBCoreDefaultDataSource() {
 			
@@ -74,7 +80,10 @@ public class DBCoreConfigClass {
 		dataSource.setMinimumIdle(Integer.parseInt(minPoolSize));
 		return dataSource;
 	}
-	
+	/**
+	 * make bean object of EntityManagerFactoryBean
+	 * @return EntityManagerFactory
+	 */
 	@Bean(name = "DBCoreEntityManagerFactory")
 	public EntityManagerFactory DBCoreEntityManagerFactory() {
 		DBCoreLogger.printTrace("DBCORE:" + driverClassName 
@@ -102,14 +111,20 @@ public class DBCoreConfigClass {
        
        return factoryBean.getNativeEntityManagerFactory();
 	}
-	
+	/**
+	 * make bean object of DBCoreAccessManager
+	 * @return DBCoreAccessManager
+	 */
 	@Bean(name="DBAccessManager")
 	@DependsOn({"getMap","DBCoreEntityManagerFactory"})
 	public DBCoreAccessManager getdbCoreAccessManager() {
 		DBCoreAccessManager myaccessor=new DBCoreAccessManager();
 		return myaccessor;
 	}
-	
+	/**
+	 * make bean object of HibernateJpaSessionFactory
+	 * @return SessionFactory
+	 */
 	@Bean(name="DBCoreSessionFactory")
 	@DependsOn({"getMap","DBCoreEntityManagerFactory","DBAccessManager" })
 	public SessionFactory DBCoreSessionFactory(
@@ -118,8 +133,10 @@ public class DBCoreConfigClass {
 	    fact.setEntityManagerFactory(emf);
 	    return fact.getObject();
 	}
-
-	
+	/**
+	 * make bean object of DBCoretransactionManager
+	 * @return JpaTransactionManager
+	 */
 	@Bean(name="DBCoreTransacionManager")
 	public JpaTransactionManager DBCoretransactionManager(
 			@Qualifier("DBCoreEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
@@ -127,7 +144,10 @@ public class DBCoreConfigClass {
 			transactionManager.setEntityManagerFactory(entityManagerFactory);
 			return transactionManager;
 	}
-	
+	/**
+	 * make bean object of DBCoreSessionManager
+	 * @return DBCoreSessionManager
+	 */
 	@Bean(name="DBManager")
 	@DependsOn({"DBCoreSessionFactory" })
 	public DBCoreSessionManager getDBManager(
@@ -135,6 +155,14 @@ public class DBCoreConfigClass {
 		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");
 		return returnManager;
+	}
+	/**
+	 * make bean object of NationErrorMessages
+	 * @return NationErrorMessages
+	 */
+	@Bean(name="nationErrorMessages")
+	public NationErrorMessages getErrorMessages() {
+		return new NationErrorMessages().loadMessages();
 	}
 }
 

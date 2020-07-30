@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
-/** This is implement class DBCoreAccessManager.
+/** This is DBCoreSessionManager Factory class
  * @author julu1 <julu1 @ naver.com >
  * @version 
  */
@@ -23,6 +23,11 @@ public class DBCoreAccessManager  {
 	Map<String,DBCoreSessionManager> PersistenceMap;
 	
 	
+	/**
+	 * get DBCoreSesionManager
+	 * @param String PersistenceUnit
+	 * @return DBCoreSessionManager
+	 */
 	public  DBCoreSessionManager makeSessionManager(String PersistenceUnit) {
 		if ( PersistenceUnit.equals("default"))
 			return (DBCoreSessionManager) context.getBean("DBManager");
@@ -39,10 +44,13 @@ public class DBCoreAccessManager  {
 		return returnManager;
 	}
 	
-	
+	/**
+	 * close DBCoreSessionManager
+	 * @param String PersistenceUnit
+	 */
 	public void closeSessionManager(String PersistenceUnit) {
 		DBCoreSessionManager returnManager=PersistenceMap.get(PersistenceUnit);
-		returnManager.coloseAllSessions();
+		returnManager.closeAllSessions();
 		PersistenceMap.remove(PersistenceUnit);
 	}
 }
