@@ -44,7 +44,7 @@ public class DBCoreTestController {
 		return "readFromSQLForm";
 	}
 	
-	@ControllerTestGenerator(MethodName="readAllDataFromDAO")
+//	@ControllerTestGenerator(MethodName="readAllDataFromDAO")
 	@GetMapping(value="readAllDataFromDAO")
 	public ModelAndView readAllDataFromDAO( ) {
 		ModelAndView mv=new ModelAndView("FactoryList");
@@ -54,7 +54,7 @@ public class DBCoreTestController {
 		return mv;
 	}
 	
-	@ControllerTestGenerator(MethodName="readAllDataFromAnnotation")
+//	@ControllerTestGenerator(MethodName="readAllDataFromAnnotation")
 	@GetMapping(value="readAllDataFromAnnotation")
 	public ModelAndView reaAlldData( ) {
 		ModelAndView mv=new ModelAndView("FactoryList");
@@ -64,7 +64,7 @@ public class DBCoreTestController {
 		return mv;
 	}
 	
-	@ControllerTestGenerator(MethodName="sessionTest")
+//	@ControllerTestGenerator(MethodName="sessionTest")
 	@RequestMapping(value="sessionTest", method=RequestMethod.GET)
 	@ResponseBody
 	public String sessionTest(@RequestParam("SessionNo") int SessionNo) {
@@ -82,7 +82,7 @@ public class DBCoreTestController {
 	 * @param sourceType
 	 * @return
 	 */
-	@ControllerTestGenerator(MethodName="readDataWithKeyFromDAO")
+//	@ControllerTestGenerator(MethodName="readDataWithKeyFromDAO")
 	@GetMapping(value="/readDataWithKeyFromDAO" )
 	public ModelAndView readDataWithKeyFromDAO( @RequestParam("memberCorpid") String memberCorpid,
 									@RequestParam("factoryid") String factoryid) {
@@ -93,17 +93,17 @@ public class DBCoreTestController {
 		return mv;
 	}
 	
-@ControllerTestGenerator(MethodName="readDataWithKeyFromAnnotation")
-@GetMapping(value="/readDataWithKeyFromAnnotation" )
-public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid") String memberCorpid,
-								@RequestParam("factoryid") String factoryid) {
-	ModelAndView mv=new ModelAndView("readDataWithKeyForm");
-	FactoryService factoryService=context.getBean(FactoryService.class);
-	mv.addObject("FactoryId", factoryService.readFactoryWithKey(memberCorpid,factoryid));
-	return mv;
-}
+	//@ControllerTestGenerator(MethodName="readDataWithKeyFromAnnotation")
+	@GetMapping(value="/readDataWithKeyFromAnnotation" )
+	public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid") String memberCorpid,
+									@RequestParam("factoryid") String factoryid) {
+		ModelAndView mv=new ModelAndView("readDataWithKeyForm");
+		FactoryService factoryService=context.getBean(FactoryService.class);
+		mv.addObject("FactoryId", factoryService.readFactoryWithKey(memberCorpid,factoryid));
+		return mv;
+	}
 
-	@ControllerTestGenerator(MethodName="updateDataWithKeyFromDAO")
+//	@ControllerTestGenerator(MethodName="updateDataWithKeyFromDAO")
 	@GetMapping(value="/updateDataWithKeyFromDAO")
 	@ResponseBody
 	public String updateDataWithKeyFromDAO( FactoryDTO myfactory) {
@@ -113,7 +113,7 @@ public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid")
 		return Result;
 	}
 	
-	@ControllerTestGenerator(MethodName="updateDataWithKeyFromAnnotaion")
+//	@ControllerTestGenerator(MethodName="updateDataWithKeyFromAnnotaion")
 	@GetMapping(value="/updateDataWithKeyFromAnnotaion")
 	@ResponseBody
 	public String updateDataWithKeyFromAnnotaion( FactoryDTO myfactory) {
@@ -123,7 +123,7 @@ public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid")
 		return Result;
 	}
 		
-	@ControllerTestGenerator(MethodName="deleteDataWithKeyFromDAO")
+//	@ControllerTestGenerator(MethodName="deleteDataWithKeyFromDAO")
 	@GetMapping(value="/deleteDataWithKeyFromDAO" )
 	@ResponseBody
 	public String deleteDataWithKeyFromDAO( @RequestParam("memberCorpid") String memberCorpid,
@@ -134,7 +134,7 @@ public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid")
 		return Result;
 	}
 	
-	@ControllerTestGenerator(MethodName="deleteDataWithKeyFromAnnotaion")
+//	@ControllerTestGenerator(MethodName="deleteDataWithKeyFromAnnotaion")
 	@GetMapping(value="/deleteDataWithKeyFromAnnotaion" )
 	@ResponseBody
 	public String deleteDataWithKeyFromAnnotaion( @RequestParam("memberCorpid") String memberCorpid,
@@ -146,7 +146,7 @@ public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid")
 		return Result;
 	}
 		
-	@ControllerTestGenerator(MethodName="insertFactory")
+//	@ControllerTestGenerator(MethodName="insertFactory")
 	@GetMapping(value="/insertFactory")
 	@ResponseBody
 	public String insertFactory( FactoryDTO myfactory) {
@@ -156,7 +156,7 @@ public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid")
 	}
 	
 	
-	@ControllerTestGenerator(MethodName="readDataFromSQL")
+//	@ControllerTestGenerator(MethodName="readDataFromSQL")
 	@GetMapping(value="/readDataFromSQL" )
 	public ModelAndView readDataFromSQL( @RequestParam("SQLQuery") String SQLQuery) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
@@ -165,7 +165,7 @@ public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid")
 		return mv;
 	}
 	
-	@ControllerTestGenerator(MethodName="readDataFromJPQL")
+//	@ControllerTestGenerator(MethodName="readDataFromJPQL")
 	@GetMapping(value="/readDataFromJPQL" )
 	public ModelAndView readDataFromJPQL( @RequestParam("SQLQuery") String SQLQuery ) {
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);

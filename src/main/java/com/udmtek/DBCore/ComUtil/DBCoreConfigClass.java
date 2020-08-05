@@ -21,6 +21,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import com.udmtek.DBCore.ComException.NationErrorMessages;
+import com.udmtek.DBCore.ComException.PersonLanguage;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManagerImpl;
@@ -161,8 +162,14 @@ public class DBCoreConfigClass {
 	 * @return NationErrorMessages
 	 */
 	@Bean(name="nationErrorMessages")
+	@DependsOn({"DBCoreCommService"})
 	public NationErrorMessages getErrorMessages() {
-		return new NationErrorMessages().loadMessages();
+		return new NationErrorMessages().defaultMessages();
+	}
+	
+	@Bean(name="personLanguage")
+	public PersonLanguage getPersonLanguage() {
+		return new PersonLanguage();
 	}
 }
 

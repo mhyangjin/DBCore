@@ -9,6 +9,7 @@ import org.hibernate.transform.AliasToEntityMapResultTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.udmtek.DBCore.ComException.DBAccessException;
@@ -19,7 +20,7 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
  * @author julu1 <julu1 @ naver.com >
  * @version 0.3.0
  */
-@Service
+@Component(value="DBCoreCommService")
 @DependsOn({"DBManager"})
 public class DBCoreCommServiceImpl implements DBCoreCommService {
 	@Autowired
@@ -35,13 +36,17 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 	public List<Map<String,Object>> executeNativeQuery(String queryString) throws DBAccessException{
 		List<Map<String,Object>> resultList = null;
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
+			sessionOpenHere=true;
 		}
 		SessionStateEnum sessionState=currSession.getSessionState();
 		if (sessionState == SessionStateEnum.OPEN ) {
 			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
 		}
 		//execute Native Query
 		try {
@@ -55,10 +60,10 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
-			if (sessionState == SessionStateEnum.BEGIN ) {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
 				sessionState=currSession.endTransaction(false);
 			}
-			if (sessionState == SessionStateEnum.OPEN ) {
+			if (sessionState == SessionStateEnum.OPEN  && sessionOpenHere ) {
 				sessionManager.closeSession(currSession);
 			}
 		}
@@ -75,13 +80,17 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 	public List<Map<String,Object>> executeNativeQuery(String queryString, Map<String, Object> params ) {
 		List<Map<String,Object>> resultList = null;
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
+			sessionOpenHere=true;
 		}
 		SessionStateEnum sessionState=currSession.getSessionState();
 		if (sessionState == SessionStateEnum.OPEN ) {
 			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
 		}
 		
 		try {
@@ -99,10 +108,10 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
-			if (sessionState == SessionStateEnum.BEGIN ) {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
 				sessionState=currSession.endTransaction(false);
 			}
-			if (sessionState == SessionStateEnum.OPEN ) {
+			if (sessionState == SessionStateEnum.OPEN && sessionOpenHere ) {
 				sessionManager.closeSession(currSession);
 			}
 		}
@@ -115,13 +124,17 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 	 */
 	public void executeUpdate(String queryString) throws DBAccessException{
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
+			sessionOpenHere=true;
 		}
 		SessionStateEnum sessionState=currSession.getSessionState();
 		if (sessionState == SessionStateEnum.OPEN ) {
 			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
 		}
 		try {
 			//execute Native Query
@@ -134,10 +147,10 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
-			if (sessionState == SessionStateEnum.BEGIN ) {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
 				sessionState=currSession.endTransaction(false);
 			}
-			if (sessionState == SessionStateEnum.OPEN ) {
+			if (sessionState == SessionStateEnum.OPEN && sessionOpenHere) {
 				sessionManager.closeSession(currSession);
 			}
 		}
@@ -150,13 +163,17 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 	 */
 	public void executeUpdate(String queryString, Map<String, Object> params) throws DBAccessException{
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
+			sessionOpenHere=true;
 		}
 		SessionStateEnum sessionState=currSession.getSessionState();
 		if (sessionState == SessionStateEnum.OPEN ) {
 			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
 		}
 		try {
 			//execute Native Query
@@ -172,10 +189,10 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
-			if (sessionState == SessionStateEnum.BEGIN ) {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
 				sessionState=currSession.endTransaction(false);
 			}
-			if (sessionState == SessionStateEnum.OPEN ) {
+			if (sessionState == SessionStateEnum.OPEN && sessionOpenHere) {
 				sessionManager.closeSession(currSession);
 			}
 		}

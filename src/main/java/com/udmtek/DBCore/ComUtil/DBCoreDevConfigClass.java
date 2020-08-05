@@ -140,6 +140,7 @@ public class DBCoreDevConfigClass {
 	}
 	
 	@Bean(name="nationErrorMessages")
+	@DependsOn({"DBCoreCommService"})
 	public NationErrorMessages getErrorMessages() {
 		return new NationErrorMessages().defaultMessages();
 	}

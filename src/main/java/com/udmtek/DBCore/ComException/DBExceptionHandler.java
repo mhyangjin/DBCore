@@ -2,6 +2,7 @@ package com.udmtek.DBCore.ComException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,6 +16,7 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
  * @version 0.3.0
  */
 @ControllerAdvice
+@DependsOn({"nationErrorMessages","personLanguage"})
 public class DBExceptionHandler {
 	@Autowired
 	@Qualifier("personLanguage")
