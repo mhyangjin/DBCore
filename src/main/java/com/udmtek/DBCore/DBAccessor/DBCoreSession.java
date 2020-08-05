@@ -56,14 +56,10 @@ public interface DBCoreSession{
 	 */
 	public SessionFactory getSessionFactory();
 
-<<<<<<< HEAD
-	public boolean isBeginTransaction();
-}
-=======
 	/**
 	 * get current Session State
 	 * @return SessionStateEnum
 	 */
 	public SessionStateEnum getSessionState();
 }
->>>>>>> udmtek
+
