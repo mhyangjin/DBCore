@@ -1,7 +1,5 @@
 package com.udmtek.DBCore.DBAccessor;
 
-import javax.persistence.EntityManagerFactory;
-
 import org.hibernate.SessionFactory;
 
 
@@ -18,7 +16,6 @@ public interface DBCoreSessionManager{
 	public static ThreadLocal<DBCoreSession> DBSession=new ThreadLocal<DBCoreSession>();	
 	/**
 	 * get opended session in current thread.
-	 * @param
 	 * @return DBCoreSession
 	 */
 	public static DBCoreSession getCurrentSession() { return DBSession.get();} 
@@ -26,19 +23,15 @@ public interface DBCoreSessionManager{
 	/**
 	 * make connection with specified Database
 	 * @param String  : persistence-unit name in peristence.xml
-	 * @return void
 	 */
 	public void startSessionManager(String argPersistUnit);
 	/**
 	 * get persistence-unit name of connected database
-	 * @param
 	 * @return String
 	 */
 	public String getPersistUnit();
 	/**
 	 * print persistence UnitName and maximumPoolSize 
-	 * @param
-	 * @return void
 	 */
 	public void printValues();
 	/**
@@ -53,26 +46,21 @@ public interface DBCoreSessionManager{
 	 * @return DBCoreSession
 	 */	
 	public DBCoreSession openSession(int retryNo, long waitTime);
-	
 	/**
 	 * close session.
 	 * @param opended session.
-	 * @return boolean
+	 * @return SessionStateEnum
 	 */
-	public boolean closeSession(DBCoreSession currSession);
-	
+	public SessionStateEnum closeSession(DBCoreSession currSession);
 	/**
 	 * get SessionFactory.
-	 * @param
 	 * @return SessionFactory
 	 */
 	public SessionFactory getSessionFactory();
 	
 	/**
 	 * close all sessions. can't use DBCoreSessionManager any more.
-	 * @param
-	 * @return void
 	 */
-	public void coloseAllSessions();
+	public void closeAllSessions();
 	
 }

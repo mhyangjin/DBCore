@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.udmtek.DBCore.ComException.DBException;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /**
+ * This is AOP specification for Transaction controll
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
@@ -26,59 +28,70 @@ public class TransactionAOP {
 	DBCoreSessionManager myManager;
 		
 	@Around("@annotation(DBCoreTransactional)&& @annotation(target)") 
-	public Object DBCoreTransactional(ProceedingJoinPoint joinpoint, DBCoreTransactional target) throws Throwable {
+	public Object DBCoreTransactional(ProceedingJoinPoint joinpoint, DBCoreTransactional target) throws DBException,Throwable {
 		DBCoreSession currSession=myManager.openSession(3, 100);
 		if ( currSession == null) {
 			 DBCoreLogger.printDBError("There is no available session "+joinpoint.getSignature());
 			 return null;
 		}
-			
-		 Object result=null;
-		 boolean BeginOK=false;
+		 SessionStateEnum sessionState=SessionStateEnum.OPEN;
 		 try {
-			 BeginOK=currSession.beginTransaction(false);
+			 Object result=null;
+			 sessionState=currSession.beginTransaction(false);  //beginTransaction readOnly=false
 			 //////////////////원래 호출하려는 method////////////////
 			 result=joinpoint.proceed(joinpoint.getArgs());
 			 //////////////////////////////////////////////////
-			 currSession.endTransaction(true);
+			 if ( sessionState == SessionStateEnum.BEGIN )
+				 sessionState=currSession.endTransaction(true); //endTransaction commit=OK
+			 return result;
 		 }
-		 catch (Exception e) {
+		 catch (DBException e) {
+			 throw e;
+		 }
+		 catch (Throwable e) {
 			 DBCoreLogger.printDBInfo("Exception throws in "+joinpoint.getSignature()+" "+ e.toString());
-			 if ( BeginOK )
-				 currSession.endTransaction(false);
+			 throw e;
 		 }
 		 finally {
-			 myManager.closeSession(currSession);
+			 //If sessionState is BEGIN, This means commit transaction was failed.
+			 // So have to Rollback transaction.
+			 if ( sessionState == SessionStateEnum.BEGIN )
+				 sessionState=currSession.endTransaction(false);
+			 if ( sessionState == SessionStateEnum.OPEN )
+				myManager.closeSession(currSession);
 		 }
-		 return result;
 	 }
 	
 
 	@Around("@annotation(DBCoreReadTransactional)&& @annotation(target)")
-	 public Object DBCoreReadTransactional(ProceedingJoinPoint joinpoint, DBCoreReadTransactional target) throws Throwable {
+	 public Object DBCoreReadTransactional(ProceedingJoinPoint joinpoint, DBCoreReadTransactional target) throws DBException,Throwable {
 		Object result=null;
-		
 		DBCoreSession currSession=myManager.openSession(3, 100);
 		if ( currSession == null) {
 			 DBCoreLogger.printDBError("There is no available session "+joinpoint.getSignature());
 			 return null;
 		}
-		 boolean BeginOK=false;
+		 SessionStateEnum sessionState=SessionStateEnum.OPEN;
 		try {
-			BeginOK=currSession.beginTransaction(true);
+			sessionState=currSession.beginTransaction(true);
 			 //////////////////원래 호출하려는 method////////////////
 			 result=joinpoint.proceed(joinpoint.getArgs());
+			 return result;
 			 //////////////////////////////////////////////////
-		 	 currSession.endTransaction(false);
 		 }
-		 catch (Exception e) {
+		 catch (DBException e) {
+			 throw e;
+		 }
+		 catch (Throwable e) {
 			 DBCoreLogger.printDBInfo("Exception throws in "+joinpoint.getSignature()+" "+ e.toString());
-		 if ( BeginOK )
-				 currSession.endTransaction(false);
+			 throw e;
 		 }
-		finally {
-			 myManager.closeSession(currSession);
+		 finally {
+			 if ( sessionState == SessionStateEnum.BEGIN )
+				 sessionState=currSession.endTransaction(false);
+			 if ( sessionState == SessionStateEnum.OPEN )
+				myManager.closeSession(currSession);
 		 }
-		 return result;
+
 	 }
 }

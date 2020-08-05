@@ -9,75 +9,93 @@ import org.hibernate.transform.AliasToEntityMapResultTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.udmtek.DBCore.ComException.DBAccessException;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
-@Service
+/**
+ * Implementation  of the DBCoreCommService
+ * @author julu1 <julu1 @ naver.com >
+ * @version 0.3.0
+ */
+@Component(value="DBCoreCommService")
 @DependsOn({"DBManager"})
 public class DBCoreCommServiceImpl implements DBCoreCommService {
 	@Autowired
 	@Qualifier("DBManager")
 	private DBCoreSessionManager sessionManager;
-	
+	/**
+	 * execute using query String
+	 * @param queryString
+	 * @return List<Map<String,Object>>
+	 * @exception DBAccessException
+	 */
 	@SuppressWarnings("unchecked")
-	public List<Map<String,Object>> executeNativeQuery(String queryString) {
+	public List<Map<String,Object>> executeNativeQuery(String queryString) throws DBAccessException{
 		List<Map<String,Object>> resultList = null;
-		boolean needClose=false;
-		boolean needEnd=false;
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
-			currSession.beginTransaction(true);
-			needClose=true;
-			needEnd=true;
+			sessionOpenHere=true;
 		}
-		else 
-			if (!currSession.isBeginTransaction() ) {
-				currSession.beginTransaction(true);
-				needEnd=true;
-			}
+		SessionStateEnum sessionState=currSession.getSessionState();
+		if (sessionState == SessionStateEnum.OPEN ) {
+			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
+		}
 		//execute Native Query
-		Session session= currSession.getThisSession();
 		try {
+			Session session= currSession.getThisSession();
 			SQLQuery query=session.createSQLQuery(queryString);
 			query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
 			resultList = (List<Map<String, Object>>) query.list();
 		}
 		catch (Exception e) {
 			DBCoreLogger.printDBError(e.getMessage());
+			throw new DBAccessException(e.getMessage());
 		}
-		
-		if ( needEnd )
-			currSession.endTransaction(false);
-		if (needClose)
-			sessionManager.closeSession(currSession);
-	
+		finally {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
+				sessionState=currSession.endTransaction(false);
+			}
+			if (sessionState == SessionStateEnum.OPEN  && sessionOpenHere ) {
+				sessionManager.closeSession(currSession);
+			}
+		}
 		return resultList;
 	}
-
+	/**
+	 * execute using query String with parameter
+	 * @param queryString
+	 * @param Map<String, Object> params
+	 * @return List<Map<String,Object>>
+	 * @exception DBAccessException
+	 */
 	@SuppressWarnings("unchecked")
 	public List<Map<String,Object>> executeNativeQuery(String queryString, Map<String, Object> params ) {
 		List<Map<String,Object>> resultList = null;
-		boolean needClose=false;
-		boolean needEnd=false;
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
-			currSession.beginTransaction(true);
-			needClose=true;
-			needEnd=true;
+			sessionOpenHere=true;
 		}
-		else 
-			if (!currSession.isBeginTransaction() ) {
-				currSession.beginTransaction(true);
-				needEnd=true;
-			}
-		//execute Native Query
-		Session session= currSession.getThisSession();
+		SessionStateEnum sessionState=currSession.getSessionState();
+		if (sessionState == SessionStateEnum.OPEN ) {
+			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
+		}
+		
 		try {
+			//execute Native Query
+			Session session= currSession.getThisSession();
 			SQLQuery query=session.createSQLQuery(queryString);
 			for (String key : params.keySet()) {
 				query.setParameter(key, params.get(key));
@@ -87,83 +105,96 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 		}
 		catch (Exception e) {
 			DBCoreLogger.printDBError(e.getMessage());
+			throw new DBAccessException(e.getMessage());
 		}
-		
-		if ( needEnd )
-			currSession.endTransaction(false);
-		if (needClose)
-			sessionManager.closeSession(currSession);
-	
+		finally {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
+				sessionState=currSession.endTransaction(false);
+			}
+			if (sessionState == SessionStateEnum.OPEN && sessionOpenHere ) {
+				sessionManager.closeSession(currSession);
+			}
+		}
 		return resultList;
 	}
-	
-	public void executeUpdate(String queryString) {
-		boolean needClose=false;
-		boolean needEnd=false;
+	/**
+	 * update using query string 
+	 * @param queryString
+	 * @exception DBAccessException
+	 */
+	public void executeUpdate(String queryString) throws DBAccessException{
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
-			currSession.beginTransaction(true);
-			needClose=true;
-			needEnd=true;
+			sessionOpenHere=true;
 		}
-		else 
-			if (!currSession.isBeginTransaction() ) {
-				currSession.beginTransaction(true);
-				needEnd=true;
-			}
-		//execute Native Query
-		Session session= currSession.getThisSession();	
+		SessionStateEnum sessionState=currSession.getSessionState();
+		if (sessionState == SessionStateEnum.OPEN ) {
+			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
+		}
 		try {
+			//execute Native Query
+			Session session= currSession.getThisSession();	
 			SQLQuery query=session.createSQLQuery(queryString);
 			query.executeUpdate();
-			if (needEnd )
-				currSession.endTransaction(true);
-			
 		}
 		catch (Exception e) {
 			DBCoreLogger.printDBError(e.getMessage());
-			if ( needEnd )
-				currSession.endTransaction(false);
+			throw new DBAccessException(e.getMessage());
 		}
-		if (needClose)
-			sessionManager.closeSession(currSession);
+		finally {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
+				sessionState=currSession.endTransaction(false);
+			}
+			if (sessionState == SessionStateEnum.OPEN && sessionOpenHere) {
+				sessionManager.closeSession(currSession);
+			}
+		}
 	}
-	public void executeUpdate(String queryString, Map<String, Object> params) {
-		boolean needClose=false;
-		boolean needEnd=false;
+	/**
+	 * update using query string with parameter
+	 * @param Map<String, Object> params
+	 * @param params
+	 * @exception DBAccessException
+	 */
+	public void executeUpdate(String queryString, Map<String, Object> params) throws DBAccessException{
 		DBCoreSession currSession = DBCoreSessionManager.getCurrentSession();
+		boolean sessionOpenHere=false;
+		boolean sessionBeginHere=false;
 		if (  currSession == null )
 		{
 			currSession=sessionManager.openSession(3, 100);
-			currSession.beginTransaction(true);
-			needClose=true;
-			needEnd=true;
+			sessionOpenHere=true;
 		}
-		else 
-			if (!currSession.isBeginTransaction() ) {
-				currSession.beginTransaction(true);
-				needEnd=true;
-			}
-		//execute Native Query
-		Session session= currSession.getThisSession();	
+		SessionStateEnum sessionState=currSession.getSessionState();
+		if (sessionState == SessionStateEnum.OPEN ) {
+			sessionState=currSession.beginTransaction(true);
+			sessionBeginHere=true;
+		}
 		try {
+			//execute Native Query
+			Session session= currSession.getThisSession();	
 			SQLQuery query=session.createSQLQuery(queryString);
 			for (String key : params.keySet()) {
 				query.setParameter(key, params.get(key));
 			}
 			query.executeUpdate();
-			if (needEnd )
-				currSession.endTransaction(true);
-			
 		}
 		catch (Exception e) {
 			DBCoreLogger.printDBError(e.getMessage());
-			if ( needEnd )
-				currSession.endTransaction(false);
+			throw new DBAccessException(e.getMessage());
 		}
-		if (needClose)
-			sessionManager.closeSession(currSession);
+		finally {
+			if (sessionState == SessionStateEnum.BEGIN && sessionBeginHere) {
+				sessionState=currSession.endTransaction(false);
+			}
+			if (sessionState == SessionStateEnum.OPEN && sessionOpenHere) {
+				sessionManager.closeSession(currSession);
+			}
+		}
 	}
 }

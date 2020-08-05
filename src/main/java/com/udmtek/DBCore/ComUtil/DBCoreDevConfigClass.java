@@ -18,6 +18,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import com.udmtek.DBCore.ComException.NationErrorMessages;
+import com.udmtek.DBCore.ComException.PersonLanguage;
 import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManagerImpl;
@@ -59,6 +61,7 @@ public class DBCoreDevConfigClass {
 		return Collections.synchronizedMap(new HashMap<String,DBCoreSessionManager>());
 	}
 	
+
 	@Bean
 	public DataSource defaultDataSource() {
 			
@@ -86,7 +89,7 @@ public class DBCoreDevConfigClass {
 		vendorAdapter.setShowSql(true);
         factoryBean.setJpaVendorAdapter(vendorAdapter);
         factoryBean.setDataSource(defaultDataSource());
-        factoryBean.setPackagesToScan("com.udmtek.*");
+        factoryBean.setPackagesToScan("com.udmtek.DBCore.*");
         Properties hikariproperties = new Properties();
         hikariproperties.put("hibernate.hikari.maximumPoolSize",maxPoolSize);
         factoryBean.setJpaProperties(hikariproperties);
@@ -104,8 +107,7 @@ public class DBCoreDevConfigClass {
 		DBCoreAccessManager myaccessor=new DBCoreAccessManager();
 		return myaccessor;
 	}
-	
-	
+
 	@Bean(name="DBCoreTransacionManager")
 	public JpaTransactionManager DBCoretransactionManager(
 			@Qualifier("DBCoreSessionFactory") EntityManagerFactory entityManagerFactory) {
@@ -120,5 +122,16 @@ public class DBCoreDevConfigClass {
 		DBCoreSessionManager returnManager= new DBCoreSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
 		returnManager.startSessionManager("default");
 		return returnManager;
-	}	
+	}
+	
+	@Bean(name="nationErrorMessages")
+	@DependsOn({"DBCoreCommService"})
+	public NationErrorMessages getErrorMessages() {
+		return new NationErrorMessages().defaultMessages();
+	}
+	
+	@Bean(name="personLanguage")
+	public PersonLanguage getPersonLanguage() {
+		return new PersonLanguage();
+	}
 }

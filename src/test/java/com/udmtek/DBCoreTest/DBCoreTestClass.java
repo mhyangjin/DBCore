@@ -1,19 +1,19 @@
 package com.udmtek.DBCoreTest;
 
-import java.io.Serializable;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import com.udmtek.DBCore.ComException.DBException;
 import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-import com.udmtek.DBCore.DBAccessor.DBCoreAccessManager;
 import com.udmtek.DBCore.DBAccessor.DBCoreCommService;
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
+import com.udmtek.DBCore.DBAccessor.SessionStateEnum;
 import com.udmtek.DBCore.model.factory.Factory;
 import com.udmtek.DBCore.model.factory.FactoryDAO;
 import com.udmtek.DBCore.model.factory.FactoryDTO;
@@ -36,7 +36,10 @@ public class DBCoreTestClass {
 	@Autowired
 	DBCoreCommService DBCommService;
 	
+
 	public DBCoreTestClass() {
+		DBCoreLogger.printDebug("..........DBCoreTestClass");
+
 	}
 	
 	//Session Pool test code. multi-thread로 동시 접속하여 생성함.
@@ -45,10 +48,9 @@ public class DBCoreTestClass {
 		DBCoreSession currSession=myManager.openSession(3,1000);
 		if (currSession == null )
 			return;
-		boolean BeginOK=false;
+		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try  {
-			currSession.beginTransaction(true);
-			BeginOK=true;
+			sessionState=currSession.beginTransaction(true);
 			DBCoreLogger.printInfo("Thread Name[" + Thread.currentThread().getName() 
 									+ "] Using :" + currSession.getTransactionID());
 			
@@ -58,18 +60,17 @@ public class DBCoreTestClass {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-			currSession.endTransaction(false);
 			DBCoreLogger.printInfo("Thread Name [" + Thread.currentThread().getName() 
 								+ "] release :" + currSession.getTransactionID());
 		}
-		catch ( Exception e) {
-			//Exception 처리
-			if (BeginOK)
-				currSession.endTransaction(false);
+		catch ( DBException e) {
+			throw e;
 		}
 		finally {
-			myManager.closeSession(currSession);
+			if ( sessionState == SessionStateEnum.BEGIN )
+				sessionState = currSession.endTransaction(false);
+			if ( sessionState == SessionStateEnum.OPEN)
+				 myManager.closeSession(currSession);
 		}
 		
 	}
@@ -84,25 +85,22 @@ public class DBCoreTestClass {
 		if (currSession == null )
 			return null;
 		List<FactoryDTO> Factories = null;
-		boolean BeginOK=false;
-		
+		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try  {
-			BeginOK=currSession.beginTransaction(true);
+			sessionState=currSession.beginTransaction(true);
 			//--- << 조회 부분 시작 >> ---
 			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
 			Factories = factoryDao.getAll();
 			// -- <<  조회부분 끝  >> ---
-			
-			currSession.endTransaction(false);
 		}
-		catch ( Exception e) {
-			e.printStackTrace();
-			//Exception 처리
-			if ( BeginOK)
-				currSession.endTransaction(false);
+		catch ( DBException e) {
+			throw e;
 		}
 		finally {
-			myManager.closeSession(currSession);
+			if ( sessionState == SessionStateEnum.BEGIN )
+				sessionState = currSession.endTransaction(false);
+			if ( sessionState == SessionStateEnum.OPEN)
+				 myManager.closeSession(currSession);
 		}
 		
 		
@@ -111,40 +109,37 @@ public class DBCoreTestClass {
 	}
 	
 	//FactoryDAO의 primary key를 이용한 1건 조회 기능
-		public FactoryDTO readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
-			DBCoreSession currSession=myManager.openSession(3,1000);
-			if (currSession == null )
-				return null;
-			FactoryDTO findFactory=null;
-			boolean BeginOK=false;
-			try {
-				BeginOK=currSession.beginTransaction(true);
-				DBCoreLogger.printInfo("memberCorpID:" + argmemberCorpId + " factoryId:" + argfactoryId);
-				//--- << 조회 부분 시작 >> ---
-				FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
-				Factory.Key factoryKey=new Factory.Key(argmemberCorpId,argfactoryId );		//key entity 생성
-				findFactory=factoryDao.get((Serializable)factoryKey); //key entity를 이용한 조회
-				
-				if ( findFactory == null)
-					DBCoreLogger.printInfo(" not found!");
-				else
-					DBCoreLogger.printInfo(findFactory.toString());
-				// -- <<  조회 부분 끝  >> ---
-
-				
-				currSession.endTransaction(false);
-			}
-			catch ( Exception e) {
-				//Exception 처리
-				e.printStackTrace();
-				if ( BeginOK)
-					currSession.endTransaction(false);
-			}
-			finally {
-				myManager.closeSession(currSession);
-			}
-			return findFactory;
+	public FactoryDTO readFactoryWithKey(String argmemberCorpId,String argfactoryId ) {
+		DBCoreSession currSession=myManager.openSession(3,1000);
+		if (currSession == null )
+			return null;
+		FactoryDTO findFactory=null;
+		SessionStateEnum sessionState = SessionStateEnum.OPEN;
+		try {
+			sessionState=currSession.beginTransaction(true);
+			DBCoreLogger.printInfo("memberCorpID:" + argmemberCorpId + " factoryId:" + argfactoryId);
+			//--- << 조회 부분 시작 >> ---
+			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
+			Factory.Key factoryKey=new Factory.Key(argmemberCorpId,argfactoryId );		//key entity 생성
+			findFactory=factoryDao.get(factoryKey); //key entity를 이용한 조회
+			
+			if ( findFactory == null)
+				DBCoreLogger.printInfo(" not found!");
+			else
+				DBCoreLogger.printInfo(findFactory.ToString());
+			// -- <<  조회 부분 끝  >> ---
 		}
+		catch ( DBException e) {
+			throw e;
+		}
+		finally {
+			if ( sessionState == SessionStateEnum.BEGIN )
+				sessionState = currSession.endTransaction(false);
+			if ( sessionState == SessionStateEnum.OPEN)
+				 myManager.closeSession(currSession);
+		}
+		return findFactory;
+	}
 
 	//FactoryDAO의 update 기능 (1건)
 	public String updateFactoryWithKey (FactoryDTO myfactory) {
@@ -152,25 +147,27 @@ public class DBCoreTestClass {
 		currSession = myManager.openSession(3,1000);
 		if (currSession == null )
 			return null;
-		boolean BeginOK=false;
+		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try {
-			BeginOK=currSession.beginTransaction(false);
+			sessionState=currSession.beginTransaction(false);
 	
 			//--- << update 부분 시작 >> ---
 			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
+			myfactory.setLasteventperson("mhjin");
+			myfactory.setUseyn("teset");
 			factoryDao.update( myfactory);					//이상없으면 저장
 			// -- <<  update 부분 끝  >> ---
-			
-			currSession.endTransaction(true);
+			sessionState=currSession.endTransaction(true);
 		}
-		catch ( Exception e) {
-			if ( BeginOK )
-				currSession.endTransaction(false); //Rollback			
+		catch ( DBException e) {
+			throw e;
 		}
 		finally {
-			myManager.closeSession(currSession);
+			if ( sessionState == SessionStateEnum.BEGIN )
+				sessionState = currSession.endTransaction(false);
+			if ( sessionState == SessionStateEnum.OPEN)
+				 myManager.closeSession(currSession);
 		}
-		
 		String result="Update OK";
 		return result;
 	
@@ -181,24 +178,24 @@ public class DBCoreTestClass {
 		DBCoreSession currSession=myManager.openSession(3,1000);
 		if (currSession == null )
 			return null;
-		boolean BeginOK=false;
+		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try {
-				
-			BeginOK=currSession.beginTransaction(false);
+			sessionState=currSession.beginTransaction(false);
 			//--- << delete 부분 시작 >> ---
 			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
 			Factory.Key factoryKey=new Factory.Key(argmemberCorpId,argfactoryId );	
 			factoryDao.delete( factoryKey);											//delete Call 
 			// -- << delete 부분 끝  >> ---
-			
-			currSession.endTransaction(true);
+			sessionState=currSession.endTransaction(true);
 		}
-		catch ( Exception e) {
-			if ( BeginOK )
-				currSession.endTransaction(false); //Rollback			
+		catch ( DBException e) {
+			throw e;
 		}
 		finally {
-			myManager.closeSession(currSession);
+			if ( sessionState == SessionStateEnum.BEGIN )
+				sessionState = currSession.endTransaction(false);
+			if ( sessionState == SessionStateEnum.OPEN)
+				 myManager.closeSession(currSession);
 		}
 		String result="Delete OK";
 		return result;
@@ -213,25 +210,24 @@ public class DBCoreTestClass {
 		currSession = myManager.openSession(3,1000);
 		if (currSession == null )
 			return null;
-		
-		boolean BeginOK=false;
+		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try {
 				
-			BeginOK=currSession.beginTransaction(false);
+			sessionState=currSession.beginTransaction(false);
 			//--- << insert 부분 시작 >> ---
 			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
 			factoryDao.insert( myfactory);
 			// -- <<  insert 부분 끝  >> ---
-			currSession.endTransaction(true);
+			sessionState=currSession.endTransaction(true);
 		}
-		catch ( Exception e) {
-			DBCoreLogger.printDBError(e.getMessage());
-			if ( BeginOK )
-				currSession.endTransaction(false); //Rollback	
-			result="insert fail";
+		catch ( DBException e) {
+			throw e;
 		}
 		finally {
-			myManager.closeSession(currSession);
+			if ( sessionState == SessionStateEnum.BEGIN )
+				sessionState = currSession.endTransaction(false);
+			if ( sessionState == SessionStateEnum.OPEN)
+				 myManager.closeSession(currSession);
 		}
 		
 		return result;
@@ -245,9 +241,9 @@ public class DBCoreTestClass {
 		if (currSession == null )
 			return null;
 		List<FactoryDTO> Factories=null;
-		boolean BeginOK=false;
+		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try {
-			BeginOK=currSession.beginTransaction(true);
+			sessionState=currSession.beginTransaction(true);
 			if (QueryType.equals("SQL")) { 
 				//SQL이면 native Query로 수행
 				//--- << 조회 부분 시작 >> ---
@@ -262,17 +258,15 @@ public class DBCoreTestClass {
 				Factories=factoryDao.getfromJPQL(Query);
 				// -- <<  조회부분 끝  >> ---
 			}
-			
-			currSession.endTransaction(false);
 		}
-		catch (Exception e  ) {
-			DBCoreLogger.printDBError(e.getMessage());
-			//Exception 처리
-			if ( BeginOK )
-				currSession.endTransaction(false);
+		catch ( DBException e) {
+			throw e;
 		}
 		finally {
-			myManager.closeSession(currSession);
+			if ( sessionState == SessionStateEnum.BEGIN )
+				sessionState = currSession.endTransaction(false);
+			if ( sessionState == SessionStateEnum.OPEN)
+				 myManager.closeSession(currSession);
 		}
 		return Factories;
 	}

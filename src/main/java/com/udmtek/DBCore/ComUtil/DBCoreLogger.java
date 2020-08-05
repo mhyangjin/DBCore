@@ -3,41 +3,82 @@ package com.udmtek.DBCore.ComUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.udmtek.DBCore.ComException.DBException;
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 
 
-/**
+/** 
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
  */
 public class DBCoreLogger {
 
 	private static Logger logger=LoggerFactory.getLogger(DBCoreLogger.class);
+	/**
+	 * print trace message.
+	 */
 	public static void printTrace(String msg) {
 		logger.trace(msg);
 	}
-	
+	/**
+	 * print debug message.
+	 */
 	public static void printDebug(String msg) {
 		logger.debug(msg);
 	}
-		/**
-	 * print info.
+	/**
+	 * print info message.
 	 */
 	public static void printInfo(String msg) {
 		logger.info(msg);
 	}
 
+	/**
+	 * print warning message.
+	 */
 	public static void printWarn(String msg) {
 		logger.warn(msg);
 	}
 	/**
-	 *print error
+	 * print error message
 	 */
 	public static void printError(String msg) {
 		logger.error(msg);
 	}
-
+	/**
+	 * print trace message from DBexception
+	 */
+	public static void printTrace(DBException e) {
+		logger.trace(e.getMessages());
+	}
+	/**
+	 * print debug message from DBexception
+	 */
+	public static void printDebug(DBException e) {
+		logger.debug(e.getMessages());
+	}
+	/**
+	 * print info message from DBexception
+	 */
+	public static void printInfo(DBException e) {
+		logger.info(e.getMessages());
+	}
+	/**
+	 * print warning message from DBexception
+	 */
+	public static void printWarn(DBException e) {
+		logger.warn(e.getMessages());
+	}
+	/**
+	 * print error message from DBexception
+	 */
+	public static void printError(DBException e) {
+		logger.error(e.getMessages());
+	}
+	/**
+	 * print trace message with Database info.
+	 */
 	public static void printDBTrace(String msg) {
 		String dbInfomsg="";
 		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
@@ -48,8 +89,9 @@ public class DBCoreLogger {
 		
 		logger.trace(dbInfomsg+msg);
 	}
-	
-
+	/**
+	 * print debug message with Database info.
+	 */
 	public static void printDBDebug(String msg) {
 		String dbInfomsg="";
 		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
@@ -60,7 +102,9 @@ public class DBCoreLogger {
 		
 		logger.debug(dbInfomsg+msg);
 	}
-
+	/**
+	 * print info message with Database info.
+	 */
 	public static void printDBInfo(String msg) {
 		String dbInfomsg="";
 		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
@@ -71,7 +115,9 @@ public class DBCoreLogger {
 				
 		logger.info(dbInfomsg+msg);
 	}
-	
+	/**
+	 * print warning message with Database info.
+	 */
 	public static void printDBWarn(String msg) {
 		String dbInfomsg="";
 		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
@@ -82,7 +128,9 @@ public class DBCoreLogger {
 				
 		logger.warn(dbInfomsg+msg);
 	}
-	
+	/**
+	 * print error message with Database info.
+	 */
 	public static void printDBError(String msg) {
 		String dbInfomsg="";
 		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
