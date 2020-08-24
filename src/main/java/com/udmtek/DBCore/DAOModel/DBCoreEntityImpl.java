@@ -29,46 +29,32 @@ import lombok.ToString;
 @MappedSuperclass
 public abstract class DBCoreEntityImpl implements DBCoreEntity {
 
-	@Column(name="createperson")
-	protected String createperson;
+	@Column(name="creator_id")
+	protected String creatorId;
 
-	@Column(name="createtime")
+	@Column(name="create_date_time")
 	@Temporal(TemporalType.TIMESTAMP)
-	protected Date createtime;
+	protected Date createDataTime;
 
-	@Column(name="lasteventcomment")
-	protected String lasteventcomment;
+	@Column(name="updator_id")
+	protected String updatorId;
 
-	@Column(name="lasteventname")
-	protected String lasteventname;
-
-	@Column(name="lasteventperson")
-	protected String lasteventperson;
-
-	@Column(name="lasteventtime")
+	@Column(name="update_date_time")
 	@Temporal(TemporalType.TIMESTAMP)
-	protected Date lasteventtime;
-
-	@Column(name="lasteventtimekey")
-	protected String lasteventtimekey;
+	protected Date updateDateTime;
 
 	/**
 	 * on update event, save event info.
 	 */
 	@PreUpdate
 	public void onUpdate() {
-		lasteventname="Update";
-		lasteventtime=Timestamp.valueOf(LocalDateTime.now());
-		lasteventtimekey= LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMddHHmmssn")).substring(0, 20);
+		updateDateTime=Timestamp.valueOf(LocalDateTime.now());
 	}
 	/**
 	 * on insert event, save event info.
 	 */
 	@PrePersist
 	public void onCreate() {
-		lasteventtime=createtime;
-		lasteventtimekey= LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMddHHmmssn")).substring(0, 20);
-		lasteventname="Create";
-		lasteventperson=createperson;
+		createDataTime=Timestamp.valueOf(LocalDateTime.now());
 	}
 }

@@ -58,7 +58,7 @@ public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> im
 			}
 			//convert  중 발생하는 Exception은 DBTypeException으로 throw 한다.
 		} catch(InstantiationException | IllegalAccessException e) {
-			DBCoreLogger.printDBError(e.getMessage());
+			DBCoreLogger.printDBError(this, e.getMessage());
 			throw new DBTypeException(entityType.getSimpleName(),e.getMessage());
 		}
 		return newobject;
@@ -90,7 +90,7 @@ public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> im
 				field.set(newobject, getObject);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
-			DBCoreLogger.printDBError(e.getMessage());
+			DBCoreLogger.printDBError(this,"EXCEPTION:"+ e.getMessage());
 			throw new DBTypeException(entityType.getSimpleName(),e.getMessage());
 		}
 		return newobject;
@@ -117,6 +117,7 @@ public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> im
 	 */
 	@Override
 	public List<D> toDto(List<E> entities)throws DBTypeException {
+		DBCoreLogger.printTrace("toDto:" + entities.size());
 		List<D> dtos = new ArrayList<>();
 		for ( E entity:entities) {
 			dtos.add(toDto( entity));

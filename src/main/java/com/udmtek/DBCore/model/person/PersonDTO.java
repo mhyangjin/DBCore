@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.Scope;
-import com.udmtek.DBCore.DAOModel.DBCoreDTOImpl;
+import com.udmtek.DBCore.DAOModel.DBCoreDTO;
 import java.util.Date;
 
 /***
@@ -17,35 +17,76 @@ import java.util.Date;
 @Setter
 @Component
 @Scope(value = "prototype" )
-public class PersonDTO extends DBCoreDTOImpl 
+public class PersonDTO implements DBCoreDTO 
  {
 	private String memberCorpid;
+
 	private String factoryidDft;
+
 	private String personid;
+
 	private String personname;
+
 	private String personclassid;
+
 	private String password;
+
 	private String usrFlag;
+
 	private String userType;
+
 	private String customerid;
+
 	private String deptcode;
+
 	private String email;
+
 	private String gender;
+
 	private String jobtitle;
+
 	private String jobPositionCd;
+
 	private String jobAssnCd;
+
 	private String upperPersonId;
+
 	private String telephone;
+
 	private String nationCd;
+
 	private Date joinDate;
+
 	private Date leaveDate;
+
 	private String useYn;
+
 	private String sysYn;
+
 	private Date pwChangeTime;
+
+	private String createperson;
+
+	private Date createtime;
+
+	private String lasteventperson;
+
+	private Date lasteventtime;
+
+	private String lasteventcomment;
+
+	private String lasteventname;
+
+	private String lasteventtimekey;
+
 	private String deptname;
+
 	private String email2;
+
 	private String tph2;
+
 	private String tph3;
+
 
 	public String ToString() {
 		return this.toString() + super.toString();
@@ -55,5 +96,11 @@ public class PersonDTO extends DBCoreDTOImpl
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
+
+	@Override
+	public boolean isValid() {
+		return false;
+	}
+
 
 }

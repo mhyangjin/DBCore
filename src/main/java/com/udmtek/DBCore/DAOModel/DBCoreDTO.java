@@ -11,4 +11,9 @@ public interface DBCoreDTO extends Cloneable{
 	 * @return String
 	 */
 	public String ToString();
+	/**
+	 * return the result of validation check
+	 * @return boolean
+	 */
+	public boolean isValid();
 }

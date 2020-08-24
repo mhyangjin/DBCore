@@ -5,7 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
-import com.codeJ.MVCTestGen.testWebGenerator;
+
+import com.codeJ.ControllerTest.Generator.testWebGenerator;
 /**
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0

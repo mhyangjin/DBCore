@@ -18,14 +18,35 @@ public class DBCoreLogger {
 	/**
 	 * print trace message.
 	 */
-	public static void printTrace(String msg) {
+	public static void printTrace( String msg) {
 		logger.trace(msg);
+	}
+	/**
+	 * print trace message.
+	 */
+	public static void printTrace(Object object, String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		logger.trace(msg);
+	}
+	/**
+	 * print debug message.
+	 */
+	public static void printDebug(Object object, String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		logger.debug(msg);
 	}
 	/**
 	 * print debug message.
 	 */
 	public static void printDebug(String msg) {
 		logger.debug(msg);
+	}
+	/**
+	 * print info message.
+	 */
+	public static void printInfo(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		logger.info(msg);
 	}
 	/**
 	 * print info message.
@@ -37,8 +58,22 @@ public class DBCoreLogger {
 	/**
 	 * print warning message.
 	 */
+	public static void printWarn(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		logger.warn(msg);
+	}
+	/**
+	 * print warning message.
+	 */
 	public static void printWarn(String msg) {
 		logger.warn(msg);
+	}
+	/**
+	 * print error message
+	 */
+	public static void printError(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		logger.error(msg);
 	}
 	/**
 	 * print error message
@@ -49,32 +84,137 @@ public class DBCoreLogger {
 	/**
 	 * print trace message from DBexception
 	 */
-	public static void printTrace(DBException e) {
+	public static void printTrace(Object object,DBException e) {
+		logger=LoggerFactory.getLogger(object.getClass());
 		logger.trace(e.getMessages());
 	}
 	/**
 	 * print debug message from DBexception
 	 */
-	public static void printDebug(DBException e) {
+	public static void printDebug(Object object,DBException e) {
+		logger=LoggerFactory.getLogger(object.getClass());
 		logger.debug(e.getMessages());
 	}
 	/**
 	 * print info message from DBexception
 	 */
-	public static void printInfo(DBException e) {
+	public static void printInfo(Object object,DBException e) {
+		logger=LoggerFactory.getLogger(object.getClass());
 		logger.info(e.getMessages());
 	}
 	/**
 	 * print warning message from DBexception
 	 */
-	public static void printWarn(DBException e) {
+	public static void printWarn(Object object,DBException e) {
+		logger=LoggerFactory.getLogger(object.getClass());
 		logger.warn(e.getMessages());
 	}
 	/**
 	 * print error message from DBexception
 	 */
-	public static void printError(DBException e) {
+	public static void printError(Object object,DBException e) {
+		logger=LoggerFactory.getLogger(object.getClass());
 		logger.error(e.getMessages());
+	}
+	/**
+	 * print trace message with Database info.
+	 */
+	public static void printDBTrace(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		String dbInfomsg="";
+		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
+		if ( thisSession == null )
+			dbInfomsg="[Session:Null]";
+		else 
+			dbInfomsg="[Session:" + thisSession.getTransactionID()+"]";
+		
+		logger.trace(dbInfomsg+msg);
+	}
+	/**
+	 * print debug message with Database info.
+	 */
+	public static void printDBDebug(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		String dbInfomsg="";
+		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
+		if ( thisSession == null )
+			dbInfomsg="[Session:Null]";
+		else 
+			dbInfomsg="[Session:" + thisSession.getTransactionID()+"]";
+		
+		logger.debug(dbInfomsg+msg);
+	}
+	/**
+	 * print info message with Database info.
+	 */
+	public static void printDBInfo(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		String dbInfomsg="";
+		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
+		if ( thisSession == null )
+			dbInfomsg="[Session:Null]";
+		else 
+			dbInfomsg="[Session:" + thisSession.getTransactionID()+"]";
+				
+		logger.info(dbInfomsg+msg);
+	}
+	/**
+	 * print warning message with Database info.
+	 */
+	public static void printDBWarn(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		String dbInfomsg="";
+		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
+		if ( thisSession == null )
+			dbInfomsg="[Session:Null]";
+		else 
+			dbInfomsg="[Session:" + thisSession.getTransactionID()+"]";
+				
+		logger.warn(dbInfomsg+msg);
+	}
+	/**
+	 * print error message with Database info.
+	 */
+	public static void printDBError(Object object,String msg) {
+		logger=LoggerFactory.getLogger(object.getClass());
+		String dbInfomsg="";
+		DBCoreSession thisSession=DBCoreSessionManager.getCurrentSession();
+		if ( thisSession == null )
+			dbInfomsg="[Session:Null]";
+		else 
+			dbInfomsg="[Session:" + thisSession.getTransactionID()+"]";
+				
+		logger.error(dbInfomsg+msg);
+	}
+	/**
+	 * print trace message from DBexception
+	 */
+	public static void printTrace(DBException e) {
+		logger.trace(e.getMessage());
+	}
+	/**
+	 * print debug message from DBexception
+	 */
+	public static void printDebug(DBException e) {
+		logger.debug(e.getMessage());
+	}
+	/**
+	 * print info message from DBexception
+	 */
+	public static void printInfo(DBException e) {
+		logger.info(e.getMessage());
+	}
+	/**
+	 * print warning message from DBexception
+	 */
+	public static void printWarn(DBException e) {
+		logger.warn(e.getMessage());
+	}
+	/**
+	 * print error message from DBexception
+	 */
+	public static void printError(DBException e) {
+		logger.error(e.getMessage());
 	}
 	/**
 	 * print trace message with Database info.

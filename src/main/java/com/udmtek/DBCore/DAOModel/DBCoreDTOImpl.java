@@ -14,13 +14,8 @@ import lombok.ToString;
 @Setter
 @ToString
 public abstract class DBCoreDTOImpl implements DBCoreDTO {
-	protected String createperson;
-	protected Date createtime;
-	protected String lasteventcomment;
-	protected String lasteventname;
-	protected String lasteventperson;
-	protected Date lasteventtime;
-	protected String lasteventtimekey;
-	
-
+	protected String creatorId;
+	protected Date createDateTime;
+	protected String updatorId;
+	protected Date updateDateTime;
 }

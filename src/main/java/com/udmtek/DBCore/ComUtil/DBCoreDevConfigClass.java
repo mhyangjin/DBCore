@@ -32,7 +32,7 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 @Configuration
 @EnableJpaRepositories(
-        basePackages={"com.udmtek.DBCore"},
+        basePackages={"com.udmtek.DBCore", "com.codeJ.BasicFrame"},
         entityManagerFactoryRef = "DBCoreSessionFactory",
         transactionManagerRef = "DBCoreTransacionManager")
 @Profile("dev")
@@ -89,7 +89,8 @@ public class DBCoreDevConfigClass {
 		vendorAdapter.setShowSql(true);
         factoryBean.setJpaVendorAdapter(vendorAdapter);
         factoryBean.setDataSource(defaultDataSource());
-        factoryBean.setPackagesToScan("com.udmtek.DBCore.*");
+        factoryBean.setPackagesToScan("com.codeJ.BasicFrame.*");
+ //       factoryBean.setPackagesToScan("com.udmtek.DBCore.*");
         Properties hikariproperties = new Properties();
         hikariproperties.put("hibernate.hikari.maximumPoolSize",maxPoolSize);
         factoryBean.setJpaProperties(hikariproperties);

@@ -5,7 +5,7 @@ import lombok.ToString;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.IdClass;
-import com.udmtek.DBCore.DAOModel.DBCoreEntityImpl;
+import com.udmtek.DBCore.DAOModel.DBCoreEntity;
 import javax.persistence.Id;
 import javax.persistence.Column;
 import javax.persistence.Temporal;
@@ -29,68 +29,118 @@ import com.udmtek.DBCore.DAOModel.DBCoreEntityKeyImpl;
 @Entity
 @Table(name="person")
 @IdClass(Person.Key.class)
-public class Person extends DBCoreEntityImpl 
+public class Person implements DBCoreEntity 
  {
 	@Id 
 	@Column(name="member_corpid" , nullable=false , length=40)
 	private String memberCorpid;
+
 	@Id 
 	@Column(name="factoryid_dft" , nullable=false , length=40)
 	private String factoryidDft;
+
 	@Id 
 	@Column(name="personid" , nullable=false , length=40)
 	private String personid;
+
 	@Column(name="personname" , length=40)
 	private String personname;
+
 	@Column(name="personclassid" , length=40)
 	private String personclassid;
+
 	@Column(name="password" , length=128)
 	private String password;
+
 	@Column(name="usr_flag" , length=40)
 	private String usrFlag;
+
 	@Column(name="user_type" , length=40)
 	private String userType;
+
 	@Column(name="customerid" , length=40)
 	private String customerid;
+
 	@Column(name="deptcode" , length=40)
 	private String deptcode;
+
 	@Column(name="email" , length=40)
 	private String email;
+
 	@Column(name="gender" , length=1)
 	private String gender;
+
 	@Column(name="jobtitle" , length=40)
 	private String jobtitle;
+
 	@Column(name="job_position_cd" , length=40)
 	private String jobPositionCd;
+
 	@Column(name="job_assn_cd" , length=40)
 	private String jobAssnCd;
+
 	@Column(name="upper_person_id" , length=40)
 	private String upperPersonId;
+
 	@Column(name="telephone" , length=40)
 	private String telephone;
+
 	@Column(name="nation_cd" , nullable=false , length=40)
 	private String nationCd;
+
 	@Column(name="join_date" )
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date joinDate;
+
 	@Column(name="leave_date" )
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date leaveDate;
+
 	@Column(name="use_yn" , nullable=false , length=1)
 	private String useYn;
+
 	@Column(name="sys_yn" , nullable=false , length=1)
 	private String sysYn;
+
 	@Column(name="pw_change_time" , nullable=false )
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date pwChangeTime;
+
+	@Column(name="createperson" , length=40)
+	private String createperson;
+
+	@Column(name="createtime" )
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date createtime;
+
+	@Column(name="lasteventperson" , length=40)
+	private String lasteventperson;
+
+	@Column(name="lasteventtime" )
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date lasteventtime;
+
+	@Column(name="lasteventcomment" , length=300)
+	private String lasteventcomment;
+
+	@Column(name="lasteventname" , length=50)
+	private String lasteventname;
+
+	@Column(name="lasteventtimekey" , length=25)
+	private String lasteventtimekey;
+
 	@Column(name="deptname" , length=60)
 	private String deptname;
+
 	@Column(name="email2" , length=40)
 	private String email2;
+
 	@Column(name="tph2" , length=4)
 	private String tph2;
+
 	@Column(name="tph3" , length=4)
 	private String tph3;
+
 
 	@Transient
 	private Key key;

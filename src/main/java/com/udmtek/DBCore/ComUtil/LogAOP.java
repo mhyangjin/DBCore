@@ -29,6 +29,7 @@ public class LogAOP {
 	public void logBefore(JoinPoint joinpoint) {
 		logger.trace("[DBCore] The {} begins",joinpoint.getSignature()); 
 	}
+
 	
 	@Before("execution(public * kr.co.udmtek.*.*..*.*(..))")
 	public void krlogBefore(JoinPoint joinpoint) {

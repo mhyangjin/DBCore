@@ -153,7 +153,6 @@ public class DBCoreTestClass {
 	
 			//--- << update 부분 시작 >> ---
 			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
-			myfactory.setLasteventperson("mhjin");
 			myfactory.setUseyn("teset");
 			factoryDao.update( myfactory);					//이상없으면 저장
 			// -- <<  update 부분 끝  >> ---

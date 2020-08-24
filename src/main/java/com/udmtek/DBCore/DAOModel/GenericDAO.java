@@ -17,6 +17,24 @@ import com.udmtek.DBCore.DBAccessor.DBCoreLokMode;
 public interface GenericDAO <E extends DBCoreEntity,D extends DBCoreDTO, M extends DBCoreDTOMapper<?, ?>> {
 	/**
 	 * find from the database using primary keys
+	 * @param long key Value 
+	 * @return DTO object
+	 */
+	public D get(long keyValue);
+	/**
+	 * find from the database using primary keys
+	 * @param String key Value 
+	 * @return DTO object
+	 */
+	public D get(String keyValue);
+	/**
+	 * find from the database using primary keys
+	 * @param int key Value 
+	 * @return DTO object
+	 */
+	public D get(int keyValue);
+	/**
+	 * find from the database using primary keys
 	 * @param DBCoreEntityKey 
 	 * @return DTO object
 	 */
@@ -91,6 +109,22 @@ public interface GenericDAO <E extends DBCoreEntity,D extends DBCoreDTO, M exten
 	 * @return The number of entities deleted
 	 */
 	public int delete(Map<String, Object> params);
+	/**
+	 * delete an entity from database using primary key.
+	 * @param String Key
+	 */
+	public void delete(String keyValue);
+
+	/**
+	 * delete an entity from database using primary key.
+	 * @param int key
+	 */
+	public void delete(int keyValue);
+	/**
+	 * delete an entity from database using primary key.
+	 * @param long key
+	 */
+	public void delete(long keyValue);
 }
 
 
