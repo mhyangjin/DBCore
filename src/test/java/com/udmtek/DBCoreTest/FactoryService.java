@@ -3,11 +3,11 @@ package com.udmtek.DBCoreTest;
 import java.io.Serializable;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreReadTransactional;
 import com.udmtek.DBCore.DBAccessor.DBCoreTransactional;
 import com.udmtek.DBCore.model.factory.Factory;
@@ -20,6 +20,8 @@ import com.udmtek.DBCore.model.factory.FactoryDTO;
  */
 @Component
 public class FactoryService{
+	private static Logger logger=LoggerFactory.getLogger(FactoryService.class);
+	
 	@Autowired
 	ApplicationContext context;
 	
@@ -34,7 +36,7 @@ public class FactoryService{
 		FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
 		List<FactoryDTO> Factories = factoryDao.getAll();
 		// -- <<  조회 부분 끝  >> ---
-		DBCoreLogger.printInfo("findFactory" + Factories.size());
+		logger.info("findFactory {}", Factories.size());
 		return Factories;
 	}
 
@@ -47,7 +49,7 @@ public class FactoryService{
 		Factory.Key factoryKey=new Factory.Key(argmemberCorpId,argfactoryId );	//key entity 생성
 		FactoryDTO findFactory=factoryDao.get(factoryKey); //key entity를 이용한 조회
 		// -- <<  조회 부분 끝  >> ---
-		DBCoreLogger.printInfo("findFactory" + findFactory.toString());
+		logger.info("findFactory {}",findFactory.toString());
 		return findFactory;
 	}
 

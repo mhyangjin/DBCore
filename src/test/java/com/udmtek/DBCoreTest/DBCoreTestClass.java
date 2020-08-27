@@ -1,15 +1,16 @@
 package com.udmtek.DBCoreTest;
 
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
 import com.udmtek.DBCore.ComException.DBException;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreCommService;
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
@@ -26,6 +27,8 @@ import com.udmtek.DBCore.model.factory.FactoryMapper;
 @Component
 @Scope(value = "prototype" )
 public class DBCoreTestClass {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreTestClass.class);
+	
 	@Autowired
 	@Qualifier(value="DBManager")
 	DBCoreSessionManager myManager;
@@ -38,7 +41,7 @@ public class DBCoreTestClass {
 	
 
 	public DBCoreTestClass() {
-		DBCoreLogger.printDebug("..........DBCoreTestClass");
+		logger.trace("..........DBCoreTestClass");
 
 	}
 	
@@ -51,8 +54,7 @@ public class DBCoreTestClass {
 		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try  {
 			sessionState=currSession.beginTransaction(true);
-			DBCoreLogger.printInfo("Thread Name[" + Thread.currentThread().getName() 
-									+ "] Using :" + currSession.getTransactionID());
+			logger.info("Thread Name[{}] Using {}",Thread.currentThread().getName(), currSession.getTransactionID());
 			
 			try {
 				//세션 임의 지연
@@ -60,8 +62,7 @@ public class DBCoreTestClass {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			DBCoreLogger.printInfo("Thread Name [" + Thread.currentThread().getName() 
-								+ "] release :" + currSession.getTransactionID());
+			logger.info("Thread Name[{}] release {}",Thread.currentThread().getName(), currSession.getTransactionID());
 		}
 		catch ( DBException e) {
 			throw e;
@@ -117,16 +118,16 @@ public class DBCoreTestClass {
 		SessionStateEnum sessionState = SessionStateEnum.OPEN;
 		try {
 			sessionState=currSession.beginTransaction(true);
-			DBCoreLogger.printInfo("memberCorpID:" + argmemberCorpId + " factoryId:" + argfactoryId);
+			logger.info("memberCorpID:{} factoryId:{}",argmemberCorpId, argfactoryId);
 			//--- << 조회 부분 시작 >> ---
 			FactoryDAO factoryDao=context.getBean(FactoryDAO.class);
 			Factory.Key factoryKey=new Factory.Key(argmemberCorpId,argfactoryId );		//key entity 생성
 			findFactory=factoryDao.get(factoryKey); //key entity를 이용한 조회
 			
 			if ( findFactory == null)
-				DBCoreLogger.printInfo(" not found!");
+				logger.info(" not found!");
 			else
-				DBCoreLogger.printInfo(findFactory.ToString());
+				logger.info(findFactory.ToString());
 			// -- <<  조회 부분 끝  >> ---
 		}
 		catch ( DBException e) {

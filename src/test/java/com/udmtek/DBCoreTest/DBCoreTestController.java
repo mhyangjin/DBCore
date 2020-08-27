@@ -1,5 +1,7 @@
 package com.udmtek.DBCoreTest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -9,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-
 import com.codeJ.ControllerTest.Generator.ControllerTestGenerator;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.model.factory.FactoryDTO;
 
 /**
@@ -20,13 +20,15 @@ import com.udmtek.DBCore.model.factory.FactoryDTO;
  */
 @Controller
 public class DBCoreTestController {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreTestController.class);
+	
 	@Autowired
 	ApplicationContext context;
 	
 
 	@RequestMapping(value="/")
 	public String testGuid() {
-		DBCoreLogger.printInfo("testGuid");
+		logger.info("testGuid");
 		return "main";
 	}
 
@@ -49,7 +51,7 @@ public class DBCoreTestController {
 	@GetMapping(value="readAllDataFromDAO")
 	public ModelAndView readAllDataFromDAO( ) {
 		ModelAndView mv=new ModelAndView("FactoryList");
-		DBCoreLogger.printInfo("Factory read Test..DAOImpl");
+		logger.info("Factory read Test..DAOImpl");
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 		mv.addObject("List", Mystart.readFactory());
 		return mv;
@@ -59,7 +61,7 @@ public class DBCoreTestController {
 	@GetMapping(value="readAllData")
 	public ModelAndView readAllData( ) {
 		ModelAndView mv=new ModelAndView("FactoryLists");
-		DBCoreLogger.printInfo("Factory read Test..Annotation");
+		logger.info("Factory read Test..Annotation");
 		FactoryService factoryService=context.getBean(FactoryService.class);
 		mv.addObject("List", factoryService.readFactory());
 		return mv;
@@ -151,7 +153,7 @@ public class DBCoreTestController {
 	@GetMapping(value="/insertFactory")
 	@ResponseBody
 	public String insertFactory( FactoryDTO myfactory) {
-		DBCoreLogger.printDBDebug("InsertFactory:" + myfactory.ToString());
+		logger.trace("InsertFactory:{}",myfactory.ToString());
 		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
 		return Mystart.insertFactory(myfactory);
 	}
