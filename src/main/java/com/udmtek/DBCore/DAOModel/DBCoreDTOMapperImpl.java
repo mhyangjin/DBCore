@@ -6,8 +6,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.udmtek.DBCore.ComException.DBTypeException;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
+import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 
 /**
  * Implementation  of the DBCoreDTOMapper
@@ -17,6 +19,8 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
  * @param <D> subclass of DBCoreDTO
  */
 public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> implements DBCoreDTOMapper<E , D> {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreDTOMapperImpl.class);
+	
 	private Class<D> dtoType;
 	private Class<E> entityType;
 	
@@ -58,7 +62,7 @@ public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> im
 			}
 			//convert  중 발생하는 Exception은 DBTypeException으로 throw 한다.
 		} catch(InstantiationException | IllegalAccessException e) {
-			DBCoreLogger.printDBError(this, e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBTypeException(entityType.getSimpleName(),e.getMessage());
 		}
 		return newobject;
@@ -90,7 +94,7 @@ public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> im
 				field.set(newobject, getObject);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
-			DBCoreLogger.printDBError(this,"EXCEPTION:"+ e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBTypeException(entityType.getSimpleName(),e.getMessage());
 		}
 		return newobject;
@@ -117,7 +121,6 @@ public class DBCoreDTOMapperImpl<E extends DBCoreEntity, D extends DBCoreDTO> im
 	 */
 	@Override
 	public List<D> toDto(List<E> entities)throws DBTypeException {
-		DBCoreLogger.printTrace("toDto:" + entities.size());
 		List<D> dtos = new ArrayList<>();
 		for ( E entity:entities) {
 			dtos.add(toDto( entity));

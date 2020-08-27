@@ -8,6 +8,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +39,8 @@ import com.zaxxer.hikari.HikariDataSource;
         transactionManagerRef = "DBCoreTransacionManager")
 @Profile("dev")
 public class DBCoreDevConfigClass {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreDevConfigClass.class);
+	
 	@Value("${hibernate.connection.driver_class}") 
 	String driverClassName;
 	@Value("${hibernate.connection.username}")
@@ -77,12 +81,7 @@ public class DBCoreDevConfigClass {
 	
 	@Bean(name = "DBCoreSessionFactory")
 	public SessionFactory DBCoreSessionFactory() {
-		DBCoreLogger.printInfo("DBCORE:" + driverClassName 
-	               + ":" + userName
-	               + ":" + passWord
-	               + ":" + jdbcUrl
-	               + ":" + maxPoolSize
-	               + ":" + minPoolSize );
+		logger.info("DBCORE:{}:{}:{}:{}:{}:{}",driverClassName ,userName,passWord,jdbcUrl,maxPoolSize, minPoolSize );
 
 		LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();

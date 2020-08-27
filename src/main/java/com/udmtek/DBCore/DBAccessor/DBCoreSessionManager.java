@@ -20,6 +20,15 @@ public interface DBCoreSessionManager{
 	 */
 	public static DBCoreSession getCurrentSession() { return DBSession.get();} 
 
+	public static String getSessionInfo() {
+		DBCoreSession thisSession=getCurrentSession();
+		String dbInfomsg="";
+		if ( thisSession == null )
+			dbInfomsg="[Session:Null]";
+		else 
+			dbInfomsg="[Session:" + thisSession.getTransactionID()+"]";
+		return dbInfomsg;
+	}
 	/**
 	 * make connection with specified Database
 	 * @param String  : persistence-unit name in peristence.xml

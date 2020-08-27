@@ -11,10 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
 import com.udmtek.DBCore.ComException.DBException;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-
 /**
  * This is AOP specification for Transaction controll
  * @author julu1 <julu1 @ naver.com >
@@ -23,6 +20,8 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 @Component
 @Aspect
 public class TransactionAOP {
+	private static Logger logger=LoggerFactory.getLogger(TransactionAOP.class);
+	
 	@Autowired
 	@Qualifier("DBManager")
 	DBCoreSessionManager myManager;
@@ -31,7 +30,7 @@ public class TransactionAOP {
 	public Object DBCoreTransactional(ProceedingJoinPoint joinpoint, DBCoreTransactional target) throws DBException,Throwable {
 		DBCoreSession currSession=myManager.openSession(3, 100);
 		if ( currSession == null) {
-			 DBCoreLogger.printDBError("There is no available session "+joinpoint.getSignature());
+			 logger.error("There is no available session {}",joinpoint.getSignature());
 			 return null;
 		}
 		 SessionStateEnum sessionState=SessionStateEnum.OPEN;
@@ -49,7 +48,7 @@ public class TransactionAOP {
 			 throw e;
 		 }
 		 catch (Throwable e) {
-			 DBCoreLogger.printDBInfo("Exception throws in "+joinpoint.getSignature()+" "+ e.toString());
+			 logger.info("Exception throws in {} {}",joinpoint.getSignature(),e.toString());
 			 throw e;
 		 }
 		 finally {
@@ -68,7 +67,7 @@ public class TransactionAOP {
 		Object result=null;
 		DBCoreSession currSession=myManager.openSession(3, 100);
 		if ( currSession == null) {
-			 DBCoreLogger.printDBError("There is no available session "+joinpoint.getSignature());
+			logger.error("There is no available session {}",joinpoint.getSignature());
 			 return null;
 		}
 		 SessionStateEnum sessionState=SessionStateEnum.OPEN;
@@ -83,7 +82,7 @@ public class TransactionAOP {
 			 throw e;
 		 }
 		 catch (Throwable e) {
-			 DBCoreLogger.printDBInfo("Exception throws in "+joinpoint.getSignature()+" "+ e.toString());
+			 logger.info("Exception throws in {} {}",joinpoint.getSignature(),e.toString());
 			 throw e;
 		 }
 		 finally {

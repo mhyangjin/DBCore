@@ -3,16 +3,19 @@ package com.udmtek.DBCore.DAOModel;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.udmtek.DBCore.ComException.DBTypeException;
 import com.udmtek.DBCore.ComException.InvalidNullableException;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-
 /**
  * Implementation of the DBCoreEntityKey
  * @author julu1 <julu1 @ naver.com >
  * @version 0.1.0
   */
 public class DBCoreEntityKeyImpl implements DBCoreEntityKey {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreEntityKeyImpl.class);
+	
 	private static final long serialVersionUID = -2403101385254750155L;
 	private Class<?> type;
 	

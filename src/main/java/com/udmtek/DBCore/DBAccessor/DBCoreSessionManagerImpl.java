@@ -7,17 +7,19 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /** Implementation of the DBSessionManager
  * @author julu1 <julu1 @ naver.com >
  * @version version 0.1.0
  */
 public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
+	private static Logger logger=LoggerFactory.getLogger(DBCoreSessionManagerImpl.class);
+	
 	private String PersistenceUnit;
 	private SessionFactory sessionFactory=null;
 	private int MaxSessionPoolSize;
@@ -90,9 +92,8 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	 */
 	@Override
 	public void printValues() {
-		String msg=this.getClass().getName() + "PersistenceUnitName=" + PersistenceUnit 
-											 + " MaxPoolSize=" + MaxSessionPoolSize;
-		DBCoreLogger.printInfo(msg);
+		logger.info("{} PersistenceUnitName={} MaxPoolSize={}",this.getClass().getName(),
+																PersistenceUnit, MaxSessionPoolSize);
 	}
 	/**
 	 * get the unused DBCoreSesion. return null if there is no unused session immediately.
@@ -103,8 +104,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		DBCoreSession currSession=null;
 		currSession=findUnusingSession();
 		DBSession.set(currSession);
-		String msg="UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
-		DBCoreLogger.printTrace(msg);
+		logger.trace("UnusingSessions:{} UsingSessions:{}",unusingSessions.size(),usingSessions.size());
 		DBSession.set(currSession);
 		return currSession;
 	}
@@ -118,12 +118,12 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 	public DBCoreSession openSession(int retryNo, long waitTime) {
 		DBCoreSession currSession=null;
 		if ( retryNo <=0 ) {
-			DBCoreLogger.printError("retryNo has to larger than 0");
+			logger.error("retryNo has to larger than 0");
 			return null;
 		}
 		
 		if ( waitTime < 0 ) {
-			DBCoreLogger.printError("waitTime has to larger than 0");
+			logger.error("waitTime has to larger than 0");
 			return null;
 		}
 		
@@ -132,8 +132,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 			currSession=findUnusingSession();
 			if (currSession ==null) {
 				try {
-					String msg="All Session is used.. Sleep and retry ..." + i;
-					DBCoreLogger.printInfo(msg);
+					logger.info("All Session is used.. Sleep and retry ...{}",i);
 					Thread.sleep(waitTime);
 				}
 				catch (Exception e) {
@@ -147,8 +146,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 			//set Thread Local variable
 			DBSession.set(currSession);
 
-		String msg="[OPEN]UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
-		DBCoreLogger.printTrace(msg);
+		logger.trace("[OPEN]UnusingSessions:{}  UsingSessions:{}",unusingSessions.size(),usingSessions.size());
 		
 		if ( currSession != null)
 			//set Thread Local variable
@@ -167,8 +165,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		unusingSessions.add(currSession);
 		usingSessions.remove(currSession);
 		DBSession.remove();
-		String msg="[CLOSE]UnusingSessions:" + unusingSessions.size() + " UsingSessions:" + usingSessions.size();
-		DBCoreLogger.printTrace(msg);
+		logger.trace("[CLOSE]UnusingSessions:{}  UsingSessions:{}",unusingSessions.size(),usingSessions.size());
 		return state;
 	}
 	/**
@@ -197,7 +194,7 @@ public class DBCoreSessionManagerImpl implements DBCoreSessionManager{
 		synchronized( this ) {
 			if( unusingSessions.size() == 0 )
 			{
-				DBCoreLogger.printInfo("All Session is used!!");
+				logger.info("All Session is used!!");
 				//have to add throwing the exception later
 				return currSession;
 			}

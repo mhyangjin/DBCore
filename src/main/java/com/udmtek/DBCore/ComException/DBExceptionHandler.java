@@ -1,5 +1,7 @@
 package com.udmtek.DBCore.ComException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
@@ -7,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /**
  * This is ExceptionHandler for DBExceptions
@@ -18,6 +18,8 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 @ControllerAdvice
 @DependsOn({"nationErrorMessages","personLanguage"})
 public class DBExceptionHandler {
+	private static Logger logger=LoggerFactory.getLogger(DBExceptionHandler.class);
+	
 	@Autowired
 	@Qualifier("personLanguage")
 	PersonLanguage personLanguage;
@@ -33,7 +35,7 @@ public class DBExceptionHandler {
 	 */
 	@ExceptionHandler(DBAccessException.class)
 	public ResponseEntity<ErrorResponse> handleDBAccessException( DBAccessException e) {
-		DBCoreLogger.printTrace("DBAccessException catched!!!" + e.getMessages());
+		logger.trace("DBAccessException catched!!! {}",e.getMessages());
 		ErrorResponse response=new ErrorResponse(e);
 		String errMessage=nationErrorMessages.getMessages(personLanguage.getNationCode(),e.getErrorCode() );
 		return new ResponseEntity<> (response.setMessage(errMessage), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -46,7 +48,7 @@ public class DBExceptionHandler {
 	 */
 	@ExceptionHandler(InvalidArgException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidArgException( InvalidArgException e) {
-		DBCoreLogger.printTrace("InvalidArgException catched!!!"+ e.getMessages());
+		logger.trace("InvalidArgException catched!!! {}",e.getMessages());
 		ErrorResponse response=new ErrorResponse(e);
 		String errMessage=nationErrorMessages.getMessages(personLanguage.getNationCode(),e.getErrorCode() );
 		return new ResponseEntity<> (response.setMessage(errMessage), HttpStatus.BAD_REQUEST);
@@ -58,7 +60,7 @@ public class DBExceptionHandler {
 	 */
 	@ExceptionHandler(InvalidLengthException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidLengthException( InvalidLengthException e) {
-		DBCoreLogger.printTrace("InvalidLengthException catched!!!"+ e.getMessages());
+		logger.trace("InvalidLengthException catched!!! {}",e.getMessages());
 		ErrorResponse response=new ErrorResponse(e);
 		String errMessage=nationErrorMessages.getMessages(personLanguage.getNationCode(),e.getErrorCode() );
 		return new ResponseEntity<> (response.setMessage(errMessage), HttpStatus.BAD_REQUEST);
@@ -70,7 +72,7 @@ public class DBExceptionHandler {
 	 */
 	@ExceptionHandler(InvalidNullableException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidNullableException( InvalidNullableException e) {
-		DBCoreLogger.printTrace("InvalidNullableException catched!!!"+ e.getMessages());
+		logger.trace("InvalidNullableException catched!!! {}",e.getMessages());
 		ErrorResponse response=new ErrorResponse(e);
 		String errMessage=nationErrorMessages.getMessages(personLanguage.getNationCode(),e.getErrorCode() );
 		return new ResponseEntity<> (response.setMessage(errMessage), HttpStatus.BAD_REQUEST);
@@ -82,7 +84,7 @@ public class DBExceptionHandler {
 	 */	
 	@ExceptionHandler(DBTypeException.class)
 	public ResponseEntity<ErrorResponse> handleDBTypeException( DBTypeException e) {
-		DBCoreLogger.printTrace("DBTypeException catched!!!"+ e.getMessages());
+		logger.trace("DBTypeException catched!!! {}",e.getMessages());
 		ErrorResponse response=new ErrorResponse(e);
 		String errMessage=nationErrorMessages.getMessages(personLanguage.getNationCode(),e.getErrorCode() );
 		return new ResponseEntity<> (response.setMessage(errMessage), HttpStatus.INTERNAL_SERVER_ERROR);

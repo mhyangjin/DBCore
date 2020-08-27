@@ -2,20 +2,15 @@ package com.udmtek.DBCore.DAOModel;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -28,7 +23,8 @@ import lombok.ToString;
 @Getter
 @MappedSuperclass
 public abstract class DBCoreEntityImpl implements DBCoreEntity {
-
+	private static Logger logger=LoggerFactory.getLogger(DBCoreEntityImpl.class);
+	
 	@Column(name="creator_id")
 	protected String creatorId;
 

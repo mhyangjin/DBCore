@@ -1,12 +1,14 @@
 package com.udmtek.DBCore.DAOModel;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Version;
 import org.hibernate.query.NativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
@@ -14,7 +16,6 @@ import org.springframework.dao.DataAccessException;
 import com.udmtek.DBCore.ComException.DBAccessException;
 import com.udmtek.DBCore.ComException.DBTypeException;
 import com.udmtek.DBCore.ComException.InvalidNullableException;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreLokMode;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 
@@ -28,6 +29,8 @@ import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
  */
 public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extends DBCoreDTOMapper<E,D>>
 							implements GenericDAO<E,D,M> {
+	private static Logger logger=LoggerFactory.getLogger(GenericDAOImpl.class);
+	
 	private Class<E> entityType;
 	private Class<D> dtoType;
 	private M mapperObject;
@@ -69,7 +72,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			result = currSession.get(entityType, key);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( result == null) return null;
@@ -91,7 +94,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			result = currSession.get(entityType, key,lockMode.getHibernateLock());
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( result == null) return null;
@@ -111,7 +114,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			entities=currSession.createQuery(Hquery).list();
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( entities == null) return null;
@@ -131,7 +134,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			entities= currSession.createSQLQuery(sqlquery).addEntity(entityType).list();
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( entities == null) return null;
@@ -155,7 +158,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 											.setLockMode("this", lockMode.getHibernateLock())
 											.list();
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( entities == null) return null;
@@ -180,7 +183,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			}
 			entities = query.addEntity(entityType).list();
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( entities == null) return null;
@@ -209,7 +212,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 							.setLockMode("this", lockMode.getHibernateLock())
 							.list();
 			} catch (Exception e) {
-				DBCoreLogger.printDBError(this,e.getMessage());
+				logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 				throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 			}
 		else
@@ -223,7 +226,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 							.setLockMode("this", lockMode.getHibernateLock())
 							.list();
 			} catch (Exception e) {
-				DBCoreLogger.printDBError(this,e.getMessage());
+				logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 				throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 			}
 				
@@ -244,7 +247,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			entities=  currSession.createQuery("select m from " + entityType.getName() + " m").list();
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( entities == null) return null;
@@ -262,7 +265,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			currSession.persist(entity);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -278,7 +281,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			currSession.merge(entity);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -294,7 +297,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			currSession.delete(entity);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -311,7 +314,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			currSession.delete(getEntity(key));
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -333,7 +336,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			}
 			result= query.executeUpdate();
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		return result;
@@ -344,7 +347,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			return (E)currSession.get(entityType, key);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -353,7 +356,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			return (E)currSession.get(entityType, keyValue);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -362,7 +365,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			return (E)currSession.get(entityType, keyValue);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -372,7 +375,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			return (E)currSession.get(entityType, keyValue);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -385,7 +388,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			result = currSession.get(entityType, keyValue);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( result == null) return null;
@@ -399,7 +402,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			result = currSession.get(entityType, keyValue);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( result == null) return null;
@@ -413,7 +416,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			result = currSession.get(entityType, keyValue);
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 		if ( result == null) return null;
@@ -425,7 +428,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			currSession.delete(getEntity(keyValue));
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -436,7 +439,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			currSession.delete(get(keyValue));
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -446,7 +449,7 @@ public class GenericDAOImpl<E extends DBCoreEntity,D extends DBCoreDTO, M extend
 			Session currSession= DBCoreSessionManager.getCurrentSession().getThisSession();
 			currSession.delete(get(keyValue));
 		} catch (Exception e) {
-			DBCoreLogger.printDBError(this,e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}

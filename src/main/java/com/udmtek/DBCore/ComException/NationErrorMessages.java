@@ -3,8 +3,10 @@ package com.udmtek.DBCore.ComException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 import com.udmtek.DBCore.DBAccessor.DBCoreCommService;
 
 /** This is for err message.
@@ -13,14 +15,13 @@ import com.udmtek.DBCore.DBAccessor.DBCoreCommService;
  * @version 0.3.0
  */
 public class NationErrorMessages {
-	@Autowired
-	DBCoreCommService dbCoreCommService;
+	private static Logger logger=LoggerFactory.getLogger(NationErrorMessages.class);
 	private EnumMap<NationCode, ErrorMessages> nationMessages;
 	/**
 	 * constructor NationErrorMessages
 	 */
 	public NationErrorMessages() {
-		DBCoreLogger.printTrace("NationErrorMessages. constructor call");
+		logger.trace("NationErrorMessages. constructor call");
 		nationMessages= new EnumMap<>(NationCode.class);
 	}
 	
@@ -35,34 +36,7 @@ public class NationErrorMessages {
 		return errorMessges.getMessage(errorCode.getCode());
 	}
 	
-	/**
-	 * load from data base
-	 * @return this
-	 */
-	public NationErrorMessages loadMessages() {
-		//DB로부터 CN 언어set을 읽어 온다
-		ErrorMessages cnMessage = new ErrorMessages();
-		String SqlString="select err_cd, err_msg from sys_error_cod where err_grp_cd = 'DB' and nation_cd = '" 
-						+ NationCode.CN.getNationString() + "'";
-		putMessages(cnMessage, SqlString);
-		nationMessages.put(NationCode.CN, cnMessage);
-		
-		//DB로부터 KR 언어set을 읽어 온다
-		ErrorMessages krMessage = new ErrorMessages();
-		SqlString="select err_cd, err_msg from sys_error_cod where err_grp_cd = 'DB' and nation_cd = '" 
-						+ NationCode.KR.getNationString() + "'";
-		putMessages(krMessage, SqlString);
-		nationMessages.put(NationCode.KR, krMessage);
-		
-		//DB로부터 EN언어set을 읽어 온다
-		ErrorMessages enMessage = new ErrorMessages();
-		SqlString="select err_cd, err_msg from sys_error_cod where err_grp_cd = 'DB' and nation_cd = '" 
-						+ NationCode.EN.getNationString() + "'";
-		putMessages(enMessage, SqlString);
-		nationMessages.put(NationCode.EN, enMessage);
-		
-		return this;
-	}
+	
 	/**
 	 * load from predefined DefaultMessages 
 	 * @return this
@@ -86,15 +60,7 @@ public class NationErrorMessages {
 		
 		return this;
 	}
-	
-	private NationErrorMessages putMessages(ErrorMessages errorMessage, String sqlQuery ) {
-		List<Map<String,Object>> results=dbCoreCommService.executeNativeQuery(sqlQuery);
-		for (Map<String, Object> resultMap:results) {
-			errorMessage.put((String)resultMap.get("err_cd"), (String)resultMap.get("err_msg"));
-		}
-		return this;
-	}
-	
+		
 	private NationErrorMessages putMessages(ErrorMessages errorMessage, NationCode nationCode ) {
 		DefaultMessages[] defaultMesages=DefaultMessages.values();
 		for(DefaultMessages defaultMesssage:defaultMesages) {

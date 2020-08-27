@@ -2,12 +2,11 @@ package com.udmtek.DBCore.DBAccessor;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /** This is DBCoreSessionManager Factory class
  * @author julu1 <julu1 @ naver.com >
@@ -15,6 +14,8 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
  */
 
 public class DBCoreAccessManager  {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreAccessManager.class);
+	
 	@Autowired
 	ApplicationContext context;
 	

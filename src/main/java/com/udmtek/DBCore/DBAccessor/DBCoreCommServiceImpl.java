@@ -6,14 +6,14 @@ import java.util.Map;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-
 import com.udmtek.DBCore.ComException.DBAccessException;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 
 /**
  * Implementation  of the DBCoreCommService
@@ -23,6 +23,9 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 @Component(value="DBCoreCommService")
 @DependsOn({"DBManager"})
 public class DBCoreCommServiceImpl implements DBCoreCommService {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreCommServiceImpl.class);
+	
+			
 	@Autowired
 	@Qualifier("DBManager")
 	private DBCoreSessionManager sessionManager;
@@ -56,7 +59,7 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			resultList = (List<Map<String, Object>>) query.list();
 		}
 		catch (Exception e) {
-			DBCoreLogger.printDBError(e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
@@ -104,7 +107,7 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			resultList = (List<Map<String, Object>>) query.list();
 		}
 		catch (Exception e) {
-			DBCoreLogger.printDBError(e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
@@ -143,7 +146,7 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			query.executeUpdate();
 		}
 		catch (Exception e) {
-			DBCoreLogger.printDBError(e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
@@ -185,7 +188,7 @@ public class DBCoreCommServiceImpl implements DBCoreCommService {
 			query.executeUpdate();
 		}
 		catch (Exception e) {
-			DBCoreLogger.printDBError(e.getMessage());
+			logger.error("{} {}", DBCoreSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {

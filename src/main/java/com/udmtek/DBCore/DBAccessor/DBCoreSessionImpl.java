@@ -2,13 +2,13 @@ package com.udmtek.DBCore.DBAccessor;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import com.udmtek.DBCore.ComException.DBAccessException;
-import com.udmtek.DBCore.ComUtil.DBCoreLogger;
-
 
 /** Implementation of the DBCoreSession
  * @author julu1 <julu1 @ naver.com >
@@ -17,6 +17,8 @@ import com.udmtek.DBCore.ComUtil.DBCoreLogger;
 @Component("DBCoreSession")
 @Scope(value = "prototype")
 public class DBCoreSessionImpl implements DBCoreSession {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreSessionImpl.class);
+				
 	@Autowired
 	ApplicationContext context;
 	
@@ -151,7 +153,7 @@ public class DBCoreSessionImpl implements DBCoreSession {
 			
 			sessionState=SessionStateEnum.OPEN;
 		} catch (Exception e)	 {
-			DBCoreLogger.printDBError(e.toString());
+			logger.error(e.toString());
 			new DBAccessException(e.getMessage());
 		}
 		return sessionState;

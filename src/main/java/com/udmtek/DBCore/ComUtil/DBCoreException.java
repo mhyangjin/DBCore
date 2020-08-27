@@ -3,6 +3,9 @@
  */
 package com.udmtek.DBCore.ComUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.udmtek.DBCore.DBAccessor.DBCoreSession;
 import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
 
@@ -11,7 +14,8 @@ import com.udmtek.DBCore.DBAccessor.DBCoreSessionManager;
  * @version 0.1.0
  */
 public class DBCoreException extends Exception {
-
+	private static Logger logger=LoggerFactory.getLogger(DBCoreException.class);
+	
 	private static final long serialVersionUID = 1L;
 	private String SessionInfo;
 	private String message;
@@ -42,6 +46,6 @@ public class DBCoreException extends Exception {
 	}
 	
 	public void print() {
-		DBCoreLogger.printError(SessionInfo + ":" + message);
+		logger.info("{}:{}",SessionInfo, message);
 	}
 }
