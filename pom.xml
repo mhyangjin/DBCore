@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>com.udmtek</groupId>
-	<artifactId>DBCore</artifactId>
+	<groupId>com.codeJ</groupId>
+	<artifactId>JPA</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
-	<name>DBCore</name>
+	<name>JPA</name>
 	<description>Demo project for Spring Boot</description>
 	
 	<parent>
@@ -120,8 +120,8 @@
 		</dependency>	
 		<dependency>
 		    <groupId>com.codeJ</groupId>
-		    <artifactId>MVCTestGen</artifactId>
-		    <version>0.0.1-SNAPSHOT</version>
+		    <artifactId>ControllerTest</artifactId>
+		    <version>0.0.1</version>
 		</dependency>
 	</dependencies>
 

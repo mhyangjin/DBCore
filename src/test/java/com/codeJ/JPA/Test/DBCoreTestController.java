@@ -1,0 +1,179 @@
+package com.codeJ.JPA.Test;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import com.codeJ.ControllerTest.Generator.ControllerTestGenerator;
+import com.codeJ.JPA.model.factory.FactoryDTO;
+
+/**
+ * @author julu1 <julu1 @ naver.com >
+ * @version 0.1.0
+ */
+@Controller
+public class DBCoreTestController {
+	private static Logger logger=LoggerFactory.getLogger(DBCoreTestController.class);
+	
+	@Autowired
+	ApplicationContext context;
+	
+
+	@RequestMapping(value="/")
+	public String testGuid() {
+		logger.info("testGuid");
+		return "main";
+	}
+
+	@RequestMapping(value="SessionPoolTestForm")
+	public String SessionPoolTestForm() {
+		return "SessionPoolTestForm";
+	}
+	
+	@RequestMapping(value="insertFactoryForm")
+	public String insertFactoryForm() {
+		return "insertFactoryForm";
+	}
+	
+	@RequestMapping(value="readFromSQLForm")
+	public String readFromSQLForm() {
+		return "readFromSQLForm";
+	}
+	
+	@ControllerTestGenerator
+	@GetMapping(value="readAllDataFromDAO")
+	public ModelAndView readAllDataFromDAO( ) {
+		ModelAndView mv=new ModelAndView("FactoryList");
+		logger.info("Factory read Test..DAOImpl");
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		mv.addObject("List", Mystart.readFactory());
+		return mv;
+	}
+	
+	@ControllerTestGenerator
+	@GetMapping(value="readAllData")
+	public ModelAndView readAllData( ) {
+		ModelAndView mv=new ModelAndView("FactoryLists");
+		logger.info("Factory read Test..Annotation");
+		FactoryService factoryService=context.getBean(FactoryService.class);
+		mv.addObject("List", factoryService.readFactory());
+		return mv;
+	}
+	
+	@ControllerTestGenerator
+	@RequestMapping(value="sessionTest", method=RequestMethod.GET)
+	@ResponseBody
+	public String sessionTest(@RequestParam("SessionNo") int SessionNo) {
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		for(int i=0; i< SessionNo; i++)
+			Mystart.testDBCoreSesion();
+	
+		String Result= "Create Sessions :" + SessionNo;
+		return Result;
+	}
+	
+	/**
+	 * @param memberCorpid
+	 * @param factoryid
+	 * @param sourceType
+	 * @return
+	 */
+	@ControllerTestGenerator
+	@GetMapping(value="/readDataWithKeyFromDAO" )
+	public ModelAndView readDataWithKeyFromDAO( @RequestParam("memberCorpid") String memberCorpid,
+									@RequestParam("factoryid") String factoryid) {
+		ModelAndView mv=new ModelAndView("readDataWithKeyForm");
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		FactoryDTO factory=(FactoryDTO) Mystart.readFactoryWithKey(memberCorpid,factoryid);
+		mv.addObject("FactoryId",factory );
+		return mv;
+	}
+	
+	@ControllerTestGenerator
+	@GetMapping(value="/readDataWithKeyFromAnnotation" )
+	public ModelAndView readDataWithKeyFromAnnotation( @RequestParam("memberCorpid") String memberCorpid,
+									@RequestParam("factoryid") String factoryid) {
+		ModelAndView mv=new ModelAndView("readDataWithKeyForm");
+		FactoryService factoryService=context.getBean(FactoryService.class);
+		mv.addObject("FactoryId", factoryService.readFactoryWithKey(memberCorpid,factoryid));
+		return mv;
+	}
+
+	@ControllerTestGenerator
+	@GetMapping(value="/updateDataWithKeyFromDAO")
+	@ResponseBody
+	public String updateDataWithKeyFromDAO( FactoryDTO myfactory) {
+		String Result=null;
+	DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		Result= Mystart.updateFactoryWithKey(myfactory);
+		return Result;
+	}
+	
+	@ControllerTestGenerator
+	@GetMapping(value="/updateDataWithKeyFromAnnotaion")
+	@ResponseBody
+	public String updateDataWithKeyFromAnnotaion( FactoryDTO myfactory) {
+		String Result=null;
+		FactoryService factoryService=context.getBean(FactoryService.class);
+		Result=factoryService.updateFactoryWithKey(myfactory);
+		return Result;
+	}
+		
+	@ControllerTestGenerator
+	@GetMapping(value="/deleteDataWithKeyFromDAO" )
+	@ResponseBody
+	public String deleteDataWithKeyFromDAO( @RequestParam("memberCorpid") String memberCorpid,
+									@RequestParam("factoryid") String factoryid ) {
+		String Result=null;
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		Result= Mystart.deleteFactoryWithKey(memberCorpid,factoryid);
+		return Result;
+	}
+	
+	@ControllerTestGenerator
+	@GetMapping(value="/deleteDataWithKeyFromAnnotaion" )
+	@ResponseBody
+	public String deleteDataWithKeyFromAnnotaion( @RequestParam("memberCorpid") String memberCorpid,
+									@RequestParam("factoryid") String factoryid ) {
+		
+		String Result=null;
+		FactoryService factoryService=context.getBean(FactoryService.class);
+		Result=factoryService.deleteFactoryWithKey(memberCorpid,factoryid);
+		return Result;
+	}
+		
+	@ControllerTestGenerator
+	@GetMapping(value="/insertFactory")
+	@ResponseBody
+	public String insertFactory( FactoryDTO myfactory) {
+		logger.trace("InsertFactory:{}",myfactory.ToString());
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		return Mystart.insertFactory(myfactory);
+	}
+	
+	
+	@ControllerTestGenerator
+	@GetMapping(value="/readDataFromSQL" )
+	public ModelAndView readDataFromSQL( @RequestParam("SQLQuery") String SQLQuery) {
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		ModelAndView mv=new ModelAndView("FactoryList");
+		mv.addObject("List", Mystart.readFactoryFromSQL(SQLQuery,"SQL"));
+		return mv;
+	}
+	
+	@ControllerTestGenerator
+	@GetMapping(value="/readDataFromJPQL" )
+	public ModelAndView readDataFromJPQL( @RequestParam("SQLQuery") String SQLQuery ) {
+		DBCoreTestClass	Mystart=context.getBean(DBCoreTestClass.class);
+		ModelAndView mv=new ModelAndView("FactoryList");
+		mv.addObject("List", Mystart.readFactoryFromSQL(SQLQuery,"JPQL"));
+		return mv;
+	}
+}
