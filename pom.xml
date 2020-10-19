@@ -5,8 +5,7 @@
 	
 	<groupId>com.codeJ</groupId>
 	<artifactId>JPA</artifactId>
-	<version>0.0.1</version>
-	<packaging>jar</packaging>
+	<version>0.4.0-SNAPSHOT</version>
 	<name>JPA</name>
 	<description>Demo project for Spring Boot</description>
 	
@@ -84,7 +83,6 @@
 			<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-hikaricp</artifactId>
-			<version>5.4.17.Final</version>
 		</dependency>
 			<dependency>
 			<groupId>org.hibernate</groupId>
@@ -119,15 +117,19 @@
 		    <version>3.3.1</version>
 		</dependency>	
 		<dependency>
-		    <groupId>com.codeJ</groupId>
-		    <artifactId>ControllerTest</artifactId>
-		    <version>0.0.1</version>
-		</dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+    <scope>test</scope>
+	</dependency>
+	<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-test</artifactId>
+	</dependency>
 	</dependencies>
 
 
 	<build>
-	<finalName>DBCoreTestServer</finalName>
+	<finalName>JPATestServer</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
