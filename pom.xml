@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>com.codeJ</groupId>
+	<groupId>kr.co.codeJ</groupId>
 	<artifactId>JPA</artifactId>
 	<version>0.4.0-SNAPSHOT</version>
 	<name>JPA</name>
@@ -120,6 +120,7 @@
 	<groupId>junit</groupId>
 	<artifactId>junit</artifactId>
     <scope>test</scope>
+    <version>4.10</version>
 	</dependency>
 	<dependency>
 	<groupId>org.springframework</groupId>
