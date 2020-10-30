@@ -24,7 +24,7 @@ public class TransactionAOP {
 	private static Logger logger=LoggerFactory.getLogger(TransactionAOP.class);
 	
 	@Autowired
-	@Qualifier("DBManager")
+	@Qualifier("DBSessionManager")
 	DBSessionManager myManager;
 		
 	@Around("@annotation(DBTransactional)&& @annotation(target)") 

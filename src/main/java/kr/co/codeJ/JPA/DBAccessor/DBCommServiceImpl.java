@@ -2,34 +2,27 @@ package kr.co.codeJ.JPA.DBAccessor;
 
 import java.util.List;
 import java.util.Map;
-
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import kr.co.codeJ.JPA.ComException.DBAccessException;
 
 /**
- * Implementation  of the DBCommService
+ * Implementation  of the DBCoreCommService
  * @author julu1 <julu1 @ naver.com >
- * @version 0.3.0
+  * @version 1.0.0
  */
-@Component(value="DBCommService")
-@DependsOn({"DBManager"})
+//@Component(value="DBCoreCommService")
+//@DependsOn({"DBManager"})
 public class DBCommServiceImpl implements DBCommService {
 	private static Logger logger=LoggerFactory.getLogger(DBCommServiceImpl.class);
 	
-			
 	@Autowired
-	@Qualifier("DBManager")
+	@Qualifier("DBSessionManager")
 	private DBSessionManager sessionManager;
 	/**
 	 * execute using query String
@@ -53,16 +46,16 @@ public class DBCommServiceImpl implements DBCommService {
 			sessionState=currSession.beginTransaction(true);
 			sessionBeginHere=true;
 		}
-		//execute Native Query
+			//execute Native Query
 		try {
-			Session session= currSession.getThisSession();
+			Session session= currSession.getThisSession();	
 			NativeQuery query=session.createSQLQuery(queryString);
 //			Deprecated. (since Hibernate 5.2)
 //			query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
 			resultList = (List<Map<String, Object>>) query.list();
 		}
 		catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
+			logger.error("{} {}",DBSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
@@ -100,8 +93,8 @@ public class DBCommServiceImpl implements DBCommService {
 		}
 		
 		try {
+			Session session= currSession.getThisSession();	
 			//execute Native Query
-			Session session= currSession.getThisSession();
 			NativeQuery query=session.createSQLQuery(queryString);
 			for (String key : params.keySet()) {
 				query.setParameter(key, params.get(key));
@@ -111,7 +104,7 @@ public class DBCommServiceImpl implements DBCommService {
 			resultList = (List<Map<String, Object>>) query.list();
 		}
 		catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
+			logger.error("{} {}",DBSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
@@ -150,7 +143,7 @@ public class DBCommServiceImpl implements DBCommService {
 			query.executeUpdate();
 		}
 		catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
+			logger.error("{} {}",DBSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {
@@ -192,7 +185,7 @@ public class DBCommServiceImpl implements DBCommService {
 			query.executeUpdate();
 		}
 		catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
+			logger.error("{} {}",DBSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(e.getMessage());
 		}
 		finally {

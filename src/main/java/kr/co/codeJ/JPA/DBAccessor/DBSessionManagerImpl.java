@@ -19,8 +19,6 @@ import org.springframework.context.ApplicationContext;
  */
 public class DBSessionManagerImpl implements DBSessionManager{
 	private static Logger logger=LoggerFactory.getLogger(DBSessionManagerImpl.class);
-	
-	private String PersistenceUnit;
 	private SessionFactory sessionFactory=null;
 	private int MaxSessionPoolSize;
 	private Set<DBSession> unusingSessions=null;
@@ -39,8 +37,7 @@ public class DBSessionManagerImpl implements DBSessionManager{
 	 * @param argPersistUnit
 	 */
 	public DBSessionManagerImpl(String argPersistUnit) {
-		PersistenceUnit=argPersistUnit;
-		EntityManagerFactory entityFactory=Persistence.createEntityManagerFactory(PersistenceUnit);
+		EntityManagerFactory entityFactory=Persistence.createEntityManagerFactory(argPersistUnit);
 		sessionFactory= (SessionFactory)entityFactory;
 		Map<String,Object> properties =entityFactory.getProperties();
 		MaxSessionPoolSize= Integer.parseInt(properties.get("hibernate.hikari.maximumPoolSize").toString());
@@ -61,8 +58,7 @@ public class DBSessionManagerImpl implements DBSessionManager{
 	 * @param String  : persistence-unit name in peristence.xml
 	 */
 	@Override
-	public void startSessionManager(String argPersistUnit) {
-		PersistenceUnit=argPersistUnit; 
+	public void startSessionManager() {
 		if (MaxSessionPoolSize == 0) MaxSessionPoolSize=1;
 		if (unusingSessions == null)
 		{
@@ -71,14 +67,7 @@ public class DBSessionManagerImpl implements DBSessionManager{
 		}
 		createEmptySessions();
 	}
-	/**
-	 * get persistence-unit name of connected database
-	 * @return String
-	 */
-	@Override
-	public String getPersistUnit() {
-		return PersistenceUnit;
-	}
+
 	/**
 	 * get SessionFactory.
 	 * @return SessionFactory
@@ -92,8 +81,7 @@ public class DBSessionManagerImpl implements DBSessionManager{
 	 */
 	@Override
 	public void printValues() {
-		logger.info("{} PersistenceUnitName={} MaxPoolSize={}",this.getClass().getName(),
-																PersistenceUnit, MaxSessionPoolSize);
+		logger.info("{} MaxPoolSize={}",this.getClass().getName(), MaxSessionPoolSize);
 	}
 	/**
 	 * get the unused DBCoreSesion. return null if there is no unused session immediately.
@@ -184,7 +172,7 @@ public class DBSessionManagerImpl implements DBSessionManager{
 		for ( int i=0; i < MaxSessionPoolSize; i++)
 		{
 			DBSession newSession=new DBSessionImpl();
-			String SessionName=PersistenceUnit + i;
+			String SessionName="DBSession" + i;
 			newSession.readyConnect(sessionFactory, SessionName);
 			unusingSessions.add(newSession);
 		}

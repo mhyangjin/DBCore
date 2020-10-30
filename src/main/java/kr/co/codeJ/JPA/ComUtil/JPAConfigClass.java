@@ -20,56 +20,52 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.zaxxer.hikari.HikariDataSource;
 
 import kr.co.codeJ.JPA.ComException.NationErrorMessages;
 import kr.co.codeJ.JPA.ComException.PersonLanguage;
-import kr.co.codeJ.JPA.DBAccessor.DBAccessManager;
 import kr.co.codeJ.JPA.DBAccessor.DBSessionManager;
 import kr.co.codeJ.JPA.DBAccessor.DBSessionManagerImpl;
 
 
 /** This is Configuration.
  * @author julu1 <julu1 @ naver.com >
- * @version 0.3.0
+ * @version 0.1.0
  */
 @Configuration
-@EnableJpaRepositories(
-        basePackages={"com.codeJ.JPA.model.*"},
-        entityManagerFactoryRef = "DBEntityManagerFactory",
-        transactionManagerRef = "DBTransacionManager")
-
+//@EnableJpaRepositories(
+//        basePackages={"kr.co.codeJ.JPA.model.*"},
+//        entityManagerFactoryRef = "JPAEntityManagerFactory")
 @Profile("!dev")
 public class JPAConfigClass {
-	private static Logger logger=LoggerFactory.getLogger(JPAConfigClass.class);
+	private static Logger logger=LoggerFactory.getLogger(JPADevConfigClass.class);
 	
-	@Value("${spring.datasource.mes.driverClassName}") 
+	@Value("${hibernate.connection.driver_class}") 
 	String driverClassName;
-	@Value("${spring.datasource.mes.username}")
+	@Value("${hibernate.connection.username}")
 	String userName;
-	@Value("${spring.datasource.mes.password}") 
+	@Value("${hibernate.connection.password}") 
 	String passWord;
-	@Value("${spring.datasource.mes.url}") 
+	@Value("${hibernate.connection.url}") 
 	String jdbcUrl;
-	
 	@Value("${hibernate.hikari.maximumPoolSize}") 
 	String maxPoolSize;
 	@Value("${hibernate.hikari.minimumIdle}") 
 	String minPoolSize;
 	@Value("${hibernate.dialect}") 
 	String dialect;
-	/**
-	 * make bean object of Map<String,DBCoreSessionManager> 
-	 * @return Map<String,DBCoreSessionManager>
-	 */
-	@Bean(name="getMap")
-	public Map<String,DBSessionManager> getMap() {
-		return Collections.synchronizedMap(new HashMap<String,DBSessionManager>());
-	}
-
+	@Value("${hibernate.connection.provider_class}") 
+	String providerClass;
+	@Value("kr.co.CodeJ.modelScanDir")
+	String scanDir;
+	@Value("hibernate.show_sql")
+	String showSql;
+	
 	@Bean
-	public DataSource defaultDataSource() {			
+	public DataSource defaultDataSource() {
 		HikariDataSource dataSource = new HikariDataSource();
 		dataSource.setDriverClassName(driverClassName);
 		dataSource.setUsername(userName);
@@ -80,68 +76,45 @@ public class JPAConfigClass {
 		return dataSource;
 	}
 	
-	@Bean(name = "DBSessionFactory")
-	public SessionFactory getDBSessionFactory() {
-		logger.info("JPA:{}:{}:{}:{}:{}:{}",driverClassName,userName,passWord,jdbcUrl,maxPoolSize,minPoolSize );
-
+	@Bean
+	public SessionFactory  entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-		vendorAdapter.setShowSql(true);
+		if (showSql.toUpperCase().contains("TRUE") )
+			vendorAdapter.setShowSql(true);
+		else
+			vendorAdapter.setShowSql(false);
+		
         factoryBean.setJpaVendorAdapter(vendorAdapter);
         factoryBean.setDataSource(defaultDataSource());
-        factoryBean.setPackagesToScan("com.codeJ.*");
-        Properties hikariproperties = new Properties();
-        hikariproperties.put("hibernate.hikari.maximumPoolSize",maxPoolSize);
-        factoryBean.setJpaProperties(hikariproperties);
+        factoryBean.setPackagesToScan(scanDir);
+        
+//        Properties hikariproperties = new Properties();
+//        hikariproperties.put("hibernate.hikari.maximumPoolSize",maxPoolSize);
+//        factoryBean.setJpaProperties(hikariproperties);
+//        
         Map<String, Property> jpaProperties=new HashMap<>();
         jpaProperties.put("hibernate.dialect", Property.forName(dialect));
        factoryBean.setJpaPropertyMap(jpaProperties);
 	   factoryBean.afterPropertiesSet();
        
-       return(SessionFactory) factoryBean.getNativeEntityManagerFactory();
-	}
-	/**
-	 * make bean object of DBCoreAccessManager
-	 * @return DBCoreAccessManager
-	 */
-	@Bean(name="DBAccessManager")
-	@DependsOn({"getMap","DBSessionFactory"})
-	public DBAccessManager getDBAccessManager() {
-		DBAccessManager myaccessor=new DBAccessManager();
-		return myaccessor;
-	}
-
-	@Bean(name="DBTransacionManager")
-	public JpaTransactionManager getDBTransactionManager(
-			@Qualifier("DBSessionFactory") EntityManagerFactory entityManagerFactory) {
-			JpaTransactionManager transactionManager= new JpaTransactionManager();
-			transactionManager.setEntityManagerFactory(entityManagerFactory);
-			return transactionManager;
-	}
-	/**
-	 * make bean object of DBCoreSessionManager
-	 * @return DBCoreSessionManager
-	 */
-	@Bean(name="DBManager")
-	@DependsOn({"DBSessionFactory" })
-	public DBSessionManager getDBManager(SessionFactory sessionFactory) {
-		DBSessionManager returnManager= new DBSessionManagerImpl(sessionFactory,Integer.parseInt(maxPoolSize));
-		returnManager.startSessionManager("default");
-		return returnManager;
-	}
-	/**
-	 * make bean object of NationErrorMessages
-	 * @return NationErrorMessages
-	 */
-	@Bean(name="nationErrorMessages")
-	@DependsOn({"DBCommService"})
-	public NationErrorMessages getErrorMessages() {
-		return new NationErrorMessages().defaultMessages();
+       return (SessionFactory)factoryBean.getNativeEntityManagerFactory();
 	}
 	
-	@Bean(name="personLanguage")
-	public PersonLanguage getPersonLanguage() {
-		return new PersonLanguage();
+	@Bean(name="DBSessionManager")
+	public DBSessionManager getDBManager() {
+		DBSessionManager returnManager= new DBSessionManagerImpl(entityManagerFactory(),Integer.parseInt(maxPoolSize));
+		returnManager.startSessionManager();
+		return returnManager;
 	}
+	
+	
+//	@Bean(name="JPATransactionManager")
+//	public JpaTransactionManager transactionManager(
+//			@Qualifier("JPAEntityManagerFactory") EntityManagerFactory emf) {
+//	    JpaTransactionManager transactionManager = new JpaTransactionManager();
+//	    transactionManager.setEntityManagerFactory(emf);
+//	 
+//	    return transactionManager;
+//	}
 }
-

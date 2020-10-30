@@ -33,12 +33,8 @@ public interface DBSessionManager{
 	 * make connection with specified Database
 	 * @param String  : persistence-unit name in peristence.xml
 	 */
-	public void startSessionManager(String argPersistUnit);
-	/**
-	 * get persistence-unit name of connected database
-	 * @return String
-	 */
-	public String getPersistUnit();
+	public void startSessionManager();
+
 	/**
 	 * print persistence UnitName and maximumPoolSize 
 	 */

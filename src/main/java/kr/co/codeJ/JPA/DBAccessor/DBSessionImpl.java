@@ -26,9 +26,7 @@ public class DBSessionImpl implements DBSession {
 	private SessionFactory sessionFactory=null;
 	private String SessionName="";
 	SessionStateEnum sessionState;	
-
 	private Session thisSession=null;
-	private int SessionSeq=0;
 	
 	private int TransactionSeq=0;
 	private boolean ReadOnly;
@@ -56,10 +54,7 @@ public class DBSessionImpl implements DBSession {
 		}
 		
 		thisSession=sessionFactory.openSession();
-		if (SessionSeq >= 2147483647 ) {
-			SessionSeq=1;
-		}
-		SessionSeq++;
+		TransactionSeq=0;
 		sessionState=SessionStateEnum.OPEN;
 		return sessionState;
 	}
@@ -75,6 +70,7 @@ public class DBSessionImpl implements DBSession {
 		
 		thisSession.close();
 		thisSession=null;
+		TransactionSeq=0;
 		sessionState=SessionStateEnum.INIT;
 		return sessionState;
 	}
@@ -92,23 +88,7 @@ public class DBSessionImpl implements DBSession {
 	 */
 	@Override
 	public String getTransactionID() {
-		String TransactionID=SessionName;
-		switch (sessionState) {
-		case INIT:
-			TransactionID = TransactionID + "..";
-			break;
-		case OPEN:
-			TransactionID = TransactionID +"."+SessionSeq +".";
-			break;
-		case BEGIN:
-			TransactionID = TransactionID +"."+SessionSeq +"."+TransactionSeq;
-			break;
-		case END:
-			TransactionID = TransactionID +"."+SessionSeq +".";
-			break;
-		default:
-			break;
-		}
+		String TransactionID=SessionName + TransactionSeq;
 		return TransactionID;
 	}
 	/**
@@ -124,10 +104,6 @@ public class DBSessionImpl implements DBSession {
 		
 		this.ReadOnly = ReadOnly;
 		thisSession.getTransaction().begin();
-		
-		if (TransactionSeq >= 2147483647 ) {
-			TransactionSeq=1;
-		}
 		TransactionSeq++;
 		sessionState=SessionStateEnum.BEGIN;
 		return sessionState;
@@ -158,6 +134,38 @@ public class DBSessionImpl implements DBSession {
 			new DBAccessException(e.getMessage());
 		}
 		return sessionState;
+	}
+	/**
+	 * commit
+	 * @param void
+	 * @return void
+	 */
+	public void commit() {
+		if ( !sessionState.isPossibleProcess("endTransaction"))
+			throw new DBAccessException(sessionState.toString(),"["+ getTransactionID() + "] can not commit");
+		try {
+				thisSession.flush();
+				thisSession.getTransaction().commit();
+		} catch (Exception e)	 {
+			logger.error(e.toString());
+			new DBAccessException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * rollback
+	 * @param void
+	 * @return void
+	 */
+	public void rollback() {
+		if ( !sessionState.isPossibleProcess("endTransaction"))
+			throw new DBAccessException(sessionState.toString(),"["+ getTransactionID() + "] can not rollback");
+		try {
+			thisSession.getTransaction().rollback();
+		} catch (Exception e)	 {
+			logger.error(e.toString());
+			new DBAccessException(e.getMessage());
+		}
 	}
 	/**
 	 * get the sessionFactory

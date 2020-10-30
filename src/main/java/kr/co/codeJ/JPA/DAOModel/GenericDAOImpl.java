@@ -3,10 +3,10 @@ package kr.co.codeJ.JPA.DAOModel;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Version;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 
 import kr.co.codeJ.JPA.ComException.DBAccessException;
+import kr.co.codeJ.JPA.ComException.DBException;
 import kr.co.codeJ.JPA.ComException.DBTypeException;
 import kr.co.codeJ.JPA.ComException.InvalidNullableException;
 import kr.co.codeJ.JPA.DBAccessor.DBLockMode;
@@ -176,16 +177,25 @@ public class GenericDAOImpl<E extends GenericEntity,D extends GenericDTO, M exte
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<D> getfromSQL(Map<String, Object> params) throws DBAccessException,DBTypeException {
-		String queryString= "select * from " + entityType.getName();
+	public List<D> getfromSQL(String whereString, Map<String, Object> params) throws DBAccessException,DBTypeException {
+		StringBuffer queryString= new StringBuffer("select m from ");
+		queryString.append( entityType.getName());
+		queryString.append( " m ");
+		if ( !whereString.trim().toUpperCase().startsWith("WHERE")) 
+			if ( whereString.trim().toUpperCase().startsWith("AND")) 
+				whereString=whereString.trim().toUpperCase().replaceFirst("AND", "WHERE");
+			else
+				queryString.append(" WHERE ");
+		queryString.append(whereString);
+		
 		List<Map<String, Object>> entities=null;
 		try {
 			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			NativeQuery query=currSession.createSQLQuery(queryString);
+			Query query=currSession.createQuery(queryString.toString(),entityType);
 			for (String key : params.keySet()) {
 				query.setParameter(key, params.get(key));
 			}
-			entities = query.addEntity(entityType).list();
+			entities = query.list();
 		} catch (Exception e) {
 			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
@@ -202,17 +212,25 @@ public class GenericDAOImpl<E extends GenericEntity,D extends GenericDTO, M exte
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<D> getfromSQL(Map<String, Object> params, DBLockMode lockMode) throws DBAccessException,DBTypeException {
-		String queryString= "select * from " + entityType.getName();
+	public List<D> getfromSQL(String whereString,Map<String, Object> params, DBLockMode lockMode) throws DBAccessException,DBTypeException {
+		StringBuffer queryString= new StringBuffer("select m from ");
+		queryString.append( entityType.getName());
+		queryString.append( " m ");
+		if ( !whereString.trim().toUpperCase().startsWith("WHERE")) 
+			if ( whereString.trim().toUpperCase().startsWith("AND")) 
+				whereString=whereString.trim().toUpperCase().replaceFirst("AND", "WHERE");
+			else
+				queryString.append(" WHERE ");
+		queryString.append(whereString);
+		
 		List<Map<String, Object>> entities=null;
 		try {
 			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			NativeQuery query=currSession.createSQLQuery(queryString);
+			Query query=currSession.createQuery(queryString.toString(),entityType);
 			for (String key : params.keySet()) {
 				query.setParameter(key, params.get(key));
 			}
-			entities = query.addEntity(entityType)
-						.setLockMode("this", lockMode.getHibernateLock())
+			entities = query.setLockMode("this", lockMode.getHibernateLock())
 						.list();
 		} catch (Exception e) {
 			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
@@ -248,12 +266,17 @@ public class GenericDAOImpl<E extends GenericEntity,D extends GenericDTO, M exte
 	@Override
 	public void insert(D object) throws DataAccessException,DBTypeException{
 		E entity=(E) mapperObject.toEntity(object);
-		logger.trace("insert .. ");
-		try {	
+		try {
+//			entity.getKey().isValid();
 			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
 			currSession.persist(entity);
+		} catch (DBException e) {
+			e.printStackTrace();
+			logger.error("{} {}", DBSessionManager.getSessionInfo(), e.getMessage());
+			throw e;
 		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
+			e.printStackTrace();
+			logger.error("{} {}", DBSessionManager.getSessionInfo(), e.getMessage());
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
@@ -317,15 +340,11 @@ public class GenericDAOImpl<E extends GenericEntity,D extends GenericDTO, M exte
 	 * @exception DBAccessException,DBTypeException 
 	 */
 	@Override
-	public int delete(Map<String, Object> params) throws DataAccessException{
-		String queryString= "delete from " + entityType.getName();
+	public int delete(String queryString) throws DataAccessException{
 		int result=0;
 		try {	
 			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
 			NativeQuery query=currSession.createSQLQuery(queryString);
-			for (String key : params.keySet()) {
-				query.setParameter(key, params.get(key));
-			}
 			result= query.executeUpdate();
 		} catch (Exception e) {
 			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
@@ -343,108 +362,5 @@ public class GenericDAOImpl<E extends GenericEntity,D extends GenericDTO, M exte
 			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
 		}
 	}
-	private E getEntity(String keyValue ) throws DataAccessException {
-		try {	
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			return (E)currSession.get(entityType, keyValue);
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-	}
-	private E getEntity(int keyValue) throws DataAccessException {
-		try {	
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			return (E)currSession.get(entityType, keyValue);
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-	}
-	
-	private E getEntity(long keyValue) throws DataAccessException {
-		try {	
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			return (E)currSession.get(entityType, keyValue);
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-	}
-	@Override
-	public D get(String keyValue) throws DBAccessException,DBTypeException,InvalidNullableException {
-		if (keyValue.isEmpty() )
-			throw new InvalidNullableException("keyValue", "NULL");  //exception throw
-		GenericEntity result=null;
-		try {
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			result = currSession.get(entityType, keyValue);
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-		if ( result == null) return null;
-		return (D) mapperObject.toDto((E)result);
-	}
 
-	@Override
-	public D get(int keyValue) throws DBAccessException,DBTypeException,InvalidNullableException {
-		GenericEntity result=null;
-		try {
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			result = currSession.get(entityType, keyValue);
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-		if ( result == null) return null;
-		return (D) mapperObject.toDto((E)result);
-	}
-	
-	@Override
-	public D get(long keyValue) throws DBAccessException,DBTypeException,InvalidNullableException {
-		GenericEntity result=null;
-		try {
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			result = currSession.get(entityType, keyValue);
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-		if ( result == null) return null;
-		return (D) mapperObject.toDto((E)result);
-	}
-	@Override
-	public void delete(String keyValue) throws DataAccessException, InvalidNullableException {
-		if (keyValue.isEmpty() )
-			throw new InvalidNullableException("keyValue", "NULL");  //exception throw
-		try {	
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			currSession.delete(getEntity(keyValue));
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-	}
-
-	@Override
-	public void delete(int keyValue) throws DataAccessException, InvalidNullableException {
-		try {	
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			currSession.delete(get(keyValue));
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-	}
-	@Override
-	public void delete(long keyValue) throws DataAccessException, InvalidNullableException {
-		try {	
-			Session currSession= DBSessionManager.getCurrentSession().getThisSession();
-			currSession.delete(get(keyValue));
-		} catch (Exception e) {
-			logger.error("{} {}", DBSessionManager.getSessionInfo(),e.getMessage());
-			throw new DBAccessException(entityType.getClass().getSimpleName() , e.getMessage());
-		}
-	}
 }

@@ -44,6 +44,20 @@ public interface DBSession{
 	 * @return return true if success otherwise false.
 	 */
 	public SessionStateEnum endTransaction(boolean CommitOK);
+	
+	/**
+	 * commit
+	 * @param void
+	 * @return void
+	 */
+	public void commit();
+	
+	/**
+	 * rollback
+	 * @param void
+	 * @return void
+	 */
+	public void rollback();
 	/**
 	 * get the transactionID
 	 * @return add sequential number to given Session name from DBSessionManager 

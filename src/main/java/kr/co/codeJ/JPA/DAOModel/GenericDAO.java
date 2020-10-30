@@ -17,24 +17,6 @@ import kr.co.codeJ.JPA.DBAccessor.DBLockMode;
 public interface GenericDAO <E extends GenericEntity,D extends GenericDTO, M extends GenericDTOMapper<?, ?>> {
 	/**
 	 * find from the database using primary keys
-	 * @param long key Value 
-	 * @return DTO object
-	 */
-	public D get(long keyValue);
-	/**
-	 * find from the database using primary keys
-	 * @param String key Value 
-	 * @return DTO object
-	 */
-	public D get(String keyValue);
-	/**
-	 * find from the database using primary keys
-	 * @param int key Value 
-	 * @return DTO object
-	 */
-	public D get(int keyValue);
-	/**
-	 * find from the database using primary keys
 	 * @param GenericEntityKey 
 	 * @return DTO object
 	 */
@@ -75,14 +57,14 @@ public interface GenericDAO <E extends GenericEntity,D extends GenericDTO, M ext
 	 * @param map <"columnName", "value">
 	 * @return List of DTO object
 	 */
-	public List<D> getfromSQL(Map<String, Object> params);
+	public List<D> getfromSQL(String whereString, Map<String, Object> params);
 	/**
 	 * find from the database using parameter and lock  a shared Rock mode 
 	 * @param map <"columnName", "value">
 	 * @param DBLockMode
 	 * @return List of DTO object
 	 */
-	public  List<D> getfromSQL(Map<String, Object> params ,DBLockMode lockMode);
+	public  List<D> getfromSQL(String whereString, Map<String, Object> params ,DBLockMode lockMode);
 	/**
 	 * insert an entity to database. 
 	 * @param DTO object
@@ -108,23 +90,8 @@ public interface GenericDAO <E extends GenericEntity,D extends GenericDTO, M ext
 	 * @param map <"columnName", "value">
 	 * @return The number of entities deleted
 	 */
-	public int delete(Map<String, Object> params);
-	/**
-	 * delete an entity from database using primary key.
-	 * @param String Key
-	 */
-	public void delete(String keyValue);
+	public int delete(String deleteSQL);
 
-	/**
-	 * delete an entity from database using primary key.
-	 * @param int key
-	 */
-	public void delete(int keyValue);
-	/**
-	 * delete an entity from database using primary key.
-	 * @param long key
-	 */
-	public void delete(long keyValue);
 }
 
 
